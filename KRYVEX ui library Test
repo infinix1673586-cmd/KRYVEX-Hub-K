@@ -10863,710 +10863,608 @@ function KRYVEX:CreateWindow(
 
 end
 
+--[[
+=========================================================
+ KRYVEX NORMAL THEME PATCH (รวมก้อนเดียว)
+ วางทั้งไฟล์นี้ "เหนือบรรทัดสุดท้าย" ของไลบรารี: return KRYVEX
+ แล้วตั้งธีมเป็น "normal" ตอน CreateWindow
+=========================================================
+]]
+
+
 --=========================================================
--- KRYVEX NORMAL THEME ADDON  :: "NEON OBSIDIAN"  (standalone)
--- ไม่ต้องแก้ไฟล์ library เลย  ใช้กับ library ตัวเดิมได้ทันที
---
--- วิธีใช้ A (โฮสต์ไฟล์นี้เป็นลิงก์ raw / dpaste เหมือน library):
---   local KOMAT = loadstring(game:HttpGet("ลิงก์ library"))()
---   loadstring(game:HttpGet("ลิงก์ไฟล์นี้"))()(KOMAT)
---   KOMAT:SetTheme("normal")
---   local Window = KOMAT:CreateWindow({ ... })
---
--- วิธีใช้ B (วางตรงๆ ในสคริปต์ฮับ): ลบบรรทัดสุดท้าย `return ApplyKryvexNormalTheme`
---   ออกก่อน แล้วเรียก  ApplyKryvexNormalTheme(KOMAT)  หลังโหลด library
+-- PART 1 : PALETTE (แทนบรรทัด Themes.Normal เดิม)
 --=========================================================
 
-local function ApplyKryvexNormalTheme(KRYVEX)
+KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, {
+    ThemeId = "normal",
+    Animation = "clean",
+    IsHalloween = false,
 
-    if type(KRYVEX) ~= "table" or KRYVEX._NormalPatched then
-        return KRYVEX
+    Background = Color3.fromRGB(10, 11, 16),
+    Sidebar = Color3.fromRGB(7, 8, 12),
+    Card = Color3.fromRGB(20, 22, 30),
+    CardHover = Color3.fromRGB(32, 36, 50),
+
+    Primary = Color3.fromRGB(0, 200, 255),
+    PrimaryDark = Color3.fromRGB(0, 92, 140),
+    Text = Color3.fromRGB(240, 246, 255),
+    SubText = Color3.fromRGB(135, 150, 175),
+    ToggleOff = Color3.fromRGB(52, 56, 70),
+
+    Danger = Color3.fromRGB(255, 70, 95),
+    Success = Color3.fromRGB(60, 235, 150),
+    Warning = Color3.fromRGB(255, 200, 70),
+
+    Stroke1 = Color3.fromRGB(0, 140, 255),
+    Stroke2 = Color3.fromRGB(0, 235, 255),
+    Stroke3 = Color3.fromRGB(150, 80, 255),
+
+    Sheen1 = Color3.fromRGB(255, 255, 255),
+    Sheen2 = Color3.fromRGB(150, 190, 230),
+    Sheen3 = Color3.fromRGB(230, 240, 255),
+
+    FloatBg = Color3.fromRGB(8, 9, 14),
+    FloatEdge1 = Color3.fromRGB(0, 170, 255),
+    FloatEdge2 = Color3.fromRGB(170, 90, 255),
+
+    FxDark = Color3.fromRGB(20, 60, 120),
+    FxMid = Color3.fromRGB(0, 170, 255),
+    FxSilver = Color3.fromRGB(120, 220, 255),
+    FxLight = Color3.fromRGB(0, 235, 255),
+    FxWhite = Color3.fromRGB(255, 255, 255),
+})
+
+--=========================================================
+-- PART 2 : NORMAL FX (วางต่อท้าย PlayTween)
+--=========================================================
+
+KRYVEX.NormalFX = {
+    Intro = true,       -- ฉากเปิดเต็มจอ (เล่นครั้งเดียวต่อการรันสคริปต์)
+    Aurora = true,      -- แสงออโรร่าจางๆ หลังเนื้อหา
+    Brackets = true,    -- มุม HUD 4 มุม
+    Particles = true,   -- ฝุ่นดิจิทัลลอยขึ้น
+    Scan = true,        -- เส้นสแกนกวาดลงมาเป็นรอบๆ
+    HeaderLine = true,  -- เส้นไล่แสงใต้แถบหัว
+    TitleShine = true,  -- ชื่อหัวไล่แสง
+    BorderPulse = true, -- ขอบหายใจ
+}
+
+local OriginalSeasonFX = KRYVEX.BuildSeasonFX
+
+function KRYVEX.BuildNormalFX(Window, Main, Header, Title)
+
+    local Theme = KRYVEX.Theme
+    local FX = KRYVEX.NormalFX
+
+    local function Alive()
+        return not Window.Destroyed and Main.Parent ~= nil
     end
 
-    KRYVEX._NormalPatched = true
+    ----------------------------------------------------
+    -- INTRO (cyber boot sequence)
+    ----------------------------------------------------
 
-    local TweenService = game:GetService("TweenService")
-    local RunService = game:GetService("RunService")
+    if FX.Intro and not KRYVEX.NormalIntroPlayed then
 
-    local function CloneTheme(source, patch)
-        local result = {}
-        for key, value in pairs(source) do result[key] = value end
-        for key, value in pairs(patch or {}) do result[key] = value end
-        return result
-    end
+        KRYVEX.NormalIntroPlayed = true
 
-    local function Create(className, properties)
-        local object = Instance.new(className)
-        for property, value in pairs(properties or {}) do
-            pcall(function() object[property] = value end)
-        end
-        return object
-    end
+        task.spawn(function()
 
-    local function AddCorner(object, radius)
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, radius or 8)
-        corner.Parent = object
-        return corner
-    end
+            pcall(function()
 
-    local function AddStroke(object, color, transparency, thickness)
-        local stroke = Instance.new("UIStroke")
-        stroke.Color = color or KRYVEX.Theme.Primary
-        stroke.Transparency = transparency or 0
-        stroke.Thickness = thickness or 1
-        stroke.Parent = object
-        return stroke
-    end
+                local Root = Create("Frame", {
+                    Name = "NormalIntro",
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundColor3 = Color3.fromRGB(4, 5, 9),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ZIndex = 200,
+                })
+                Root.Parent = Main.Parent
 
-    local function PlayTween(object, time, properties, style, direction)
-        local tween = TweenService:Create(
-            object,
-            TweenInfo.new(
-                time or 0.25,
-                style or Enum.EasingStyle.Quad,
-                direction or Enum.EasingDirection.Out
-            ),
-            properties
-        )
-        tween:Play()
-        return tween
-    end
+                task.delay(6, function()
+                    if Root.Parent then Root:Destroy() end
+                end)
 
-    --------------------------------------------------------
-    -- 1) THEME COLORS
-    --------------------------------------------------------
+                PlayTween(Root, 0.3, { BackgroundTransparency = 0.12 })
 
-    KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, {
-        ThemeId = "normal",
-        Animation = "clean",
-        IsHalloween = false,
+                local Group = Create("CanvasGroup", {
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    GroupTransparency = 0,
+                    ZIndex = 201,
+                })
+                Group.Parent = Root
 
-        Background = Color3.fromRGB(9, 10, 16),
-        Sidebar = Color3.fromRGB(6, 7, 12),
-        Card = Color3.fromRGB(17, 19, 30),
-        CardHover = Color3.fromRGB(28, 32, 50),
+                -- สแกนไลน์
+                local Scan = Create("Frame", {
+                    AnchorPoint = Vector2.new(0, 0.5),
+                    Position = UDim2.new(0, 0, 0, 0),
+                    Size = UDim2.new(1, 0, 0, 2),
+                    BackgroundColor3 = Theme.FxLight,
+                    BackgroundTransparency = 0.15,
+                    BorderSizePixel = 0,
+                    ZIndex = 202,
+                })
+                Scan.Parent = Group
 
-        Primary = Color3.fromRGB(0, 214, 255),
-        PrimaryDark = Color3.fromRGB(20, 70, 170),
+                local ScanGrad = Instance.new("UIGradient")
+                ScanGrad.Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(0.5, 0),
+                    NumberSequenceKeypoint.new(1, 1),
+                })
+                ScanGrad.Parent = Scan
 
-        Text = Color3.fromRGB(240, 247, 255),
-        SubText = Color3.fromRGB(140, 155, 185),
-        ToggleOff = Color3.fromRGB(50, 55, 75),
+                AddStroke(Scan, Theme.FxLight, 0.6, 5)
 
-        Danger = Color3.fromRGB(255, 70, 95),
-        Success = Color3.fromRGB(60, 255, 160),
-        Warning = Color3.fromRGB(255, 196, 60),
+                -- วงแหวนโลโก้
+                local Ring = Create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, 0.42, 0),
+                    Size = UDim2.fromOffset(0, 0),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ZIndex = 203,
+                })
+                Ring.Parent = Group
+                AddCorner(Ring, 100)
 
-        -- border flow: cyan -> violet -> magenta
-        Stroke1 = Color3.fromRGB(0, 210, 255),
-        Stroke2 = Color3.fromRGB(140, 90, 255),
-        Stroke3 = Color3.fromRGB(255, 70, 190),
+                local RingStroke = AddStroke(Ring, Color3.new(1, 1, 1), 0, 3)
 
-        Sheen1 = Color3.fromRGB(255, 255, 255),
-        Sheen2 = Color3.fromRGB(200, 215, 255),
-        Sheen3 = Color3.fromRGB(235, 215, 255),
+                local RingGrad = Instance.new("UIGradient")
+                RingGrad.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Theme.FxLight),
+                    ColorSequenceKeypoint.new(0.5, Theme.Stroke3),
+                    ColorSequenceKeypoint.new(1, Theme.FxLight),
+                })
+                RingGrad.Parent = RingStroke
 
-        FloatBg = Color3.fromRGB(6, 7, 12),
-        FloatEdge1 = Color3.fromRGB(0, 210, 255),
-        FloatEdge2 = Color3.fromRGB(190, 110, 255),
+                local RingGlow = AddStroke(Ring, Theme.FxMid, 0.7, 10)
+                RingGlow.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-        FxDark = Color3.fromRGB(40, 60, 160),
-        FxMid = Color3.fromRGB(0, 200, 255),
-        FxSilver = Color3.fromRGB(140, 100, 255),
-        FxLight = Color3.fromRGB(120, 240, 255),
-        FxWhite = Color3.fromRGB(235, 250, 255),
-    })
+                local Logo = Create("ImageLabel", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.fromScale(0.5, 0.5),
+                    Size = UDim2.fromScale(0.58, 0.58),
+                    BackgroundTransparency = 1,
+                    Image = KRYVEX.LogoImage or "",
+                    ScaleType = Enum.ScaleType.Fit,
+                    ZIndex = 204,
+                })
+                Logo.Parent = Ring
 
-    -- turn pieces on/off before CreateWindow
-    KRYVEX.NormalFX = {
-        Intro = true,       -- cinematic "doors open" intro
-        IntroOnce = true,   -- only once per script run
-        Aurora = true,      -- drifting neon glow orbs behind the UI
-        Particles = true,   -- floating light motes
-        Scanline = true,    -- soft scan sweep
-        Brackets = true,    -- neon corner brackets
-        HeaderLine = true,  -- flowing neon line under header
-        TitleShine = true,  -- shimmering title
-        BorderPulse = true, -- breathing border
-        Ripple = true,      -- click ripple
-    }
+                -- ชื่อ + สถานะ + แถบโหลด
+                local TitleLabel = Create("TextLabel", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, 0.42, 100),
+                    Size = UDim2.new(1, 0, 0, 34),
+                    BackgroundTransparency = 1,
+                    Text = "",
+                    TextColor3 = Theme.Text,
+                    TextSize = 28,
+                    Font = Enum.Font.GothamBlack,
+                    ZIndex = 204,
+                })
+                TitleLabel.Parent = Group
 
-    --------------------------------------------------------
-    -- 2) INTRO
-    --------------------------------------------------------
+                local TitleStroke = Instance.new("UIStroke")
+                TitleStroke.Color = Theme.FxLight
+                TitleStroke.Thickness = 1.5
+                TitleStroke.Transparency = 0.55
+                TitleStroke.Parent = TitleLabel
 
-    function KRYVEX.BuildNormalIntro(ScreenGui, Window, Theme)
+                local Status = Create("TextLabel", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, 0.42, 132),
+                    Size = UDim2.new(1, 0, 0, 16),
+                    BackgroundTransparency = 1,
+                    Text = "INITIALIZING",
+                    TextColor3 = Theme.FxMid,
+                    TextSize = 11,
+                    Font = Enum.Font.Code,
+                    ZIndex = 204,
+                })
+                Status.Parent = Group
 
-        local Root = Create("Frame", {
-            Name = "NormalIntro",
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 1,
-            ZIndex = 200,
-        })
-        Root.Parent = ScreenGui
+                local BarBg = Create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, 0.42, 156),
+                    Size = UDim2.fromOffset(220, 4),
+                    BackgroundColor3 = Theme.ToggleOff,
+                    BackgroundTransparency = 0.3,
+                    BorderSizePixel = 0,
+                    ZIndex = 204,
+                })
+                BarBg.Parent = Group
+                AddCorner(BarBg, 4)
 
-        task.delay(6, function()
-            if Root.Parent then Root:Destroy() end
+                local BarFill = Create("Frame", {
+                    Size = UDim2.fromScale(0, 1),
+                    BackgroundColor3 = Color3.new(1, 1, 1),
+                    BackgroundTransparency = 0,
+                    BorderSizePixel = 0,
+                    ZIndex = 205,
+                })
+                BarFill.Parent = BarBg
+                AddCorner(BarFill, 4)
+
+                local FillGrad = Instance.new("UIGradient")
+                FillGrad.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Theme.Stroke1),
+                    ColorSequenceKeypoint.new(0.5, Theme.Stroke2),
+                    ColorSequenceKeypoint.new(1, Theme.Stroke3),
+                })
+                FillGrad.Parent = BarFill
+
+                -- หมุนวงแหวน
+                local Spin = 0
+                local SpinConn
+                SpinConn = RunService.Heartbeat:Connect(function(dt)
+                    if not Root.Parent then
+                        SpinConn:Disconnect()
+                        return
+                    end
+                    Spin = (Spin + dt * 240) % 360
+                    RingGrad.Rotation = Spin
+                end)
+
+                -- ไทม์ไลน์
+                PlayTween(Ring, 0.6, { Size = UDim2.fromOffset(120, 120) },
+                    Enum.EasingStyle.Back)
+
+                PlayTween(Scan, 1.1, { Position = UDim2.new(0, 0, 1, 0) },
+                    Enum.EasingStyle.Quad, Enum.EasingDirection.InOut)
+
+                task.wait(0.45)
+
+                PlayTween(BarFill, 1.2, { Size = UDim2.fromScale(1, 1) },
+                    Enum.EasingStyle.Quart, Enum.EasingDirection.InOut)
+
+                task.spawn(function()
+                    task.wait(0.45)
+                    if Status.Parent then Status.Text = "LOADING MODULES" end
+                    task.wait(0.45)
+                    if Status.Parent then
+                        Status.Text = "SYSTEM READY"
+                        Status.TextColor3 = Theme.Success
+                    end
+                end)
+
+                -- พิมพ์ชื่อทีละตัว
+                local Text = tostring(Window.Title or "KRYVEX")
+                local Count = utf8.len(Text) or #Text
+
+                for Index = 1, Count do
+                    if not Root.Parent then return end
+                    local Cut = utf8.offset(Text, Index + 1)
+                    TitleLabel.Text = Cut and string.sub(Text, 1, Cut - 1) or Text
+                    task.wait(0.05)
+                end
+
+                -- กระพริบแบบกลิตช์
+                for _ = 1, 2 do
+                    TitleLabel.Position = UDim2.new(0.5, 3, 0.42, 100)
+                    TitleLabel.TextColor3 = Theme.FxLight
+                    task.wait(0.04)
+                    TitleLabel.Position = UDim2.new(0.5, -3, 0.42, 100)
+                    TitleLabel.TextColor3 = Theme.Stroke3
+                    task.wait(0.04)
+                    TitleLabel.Position = UDim2.new(0.5, 0, 0.42, 100)
+                    TitleLabel.TextColor3 = Theme.Text
+                    task.wait(0.05)
+                end
+
+                task.wait(0.35)
+
+                -- ปิดฉาก
+                PlayTween(Ring, 0.45, { Size = UDim2.fromOffset(300, 300) })
+                PlayTween(Group, 0.45, { GroupTransparency = 1 })
+                PlayTween(Root, 0.5, { BackgroundTransparency = 1 })
+
+                task.wait(0.55)
+
+                if Root.Parent then Root:Destroy() end
+
+            end)
+
         end)
 
-        local function Tw(object, time, props, style, direction)
-            TweenService:Create(
-                object,
-                TweenInfo.new(
-                    time,
-                    style or Enum.EasingStyle.Quad,
-                    direction or Enum.EasingDirection.Out
-                ),
-                props
-            ):Play()
-        end
+    end
 
-        local BarColor = Color3.fromRGB(4, 5, 9)
+    ----------------------------------------------------
+    -- AURORA (แสงสลัวๆ หลังเนื้อหา)
+    ----------------------------------------------------
 
-        local Top = Create("Frame", {
-            Size = UDim2.fromScale(1, 0.5),
-            Position = UDim2.fromScale(0, 0),
-            BackgroundColor3 = BarColor,
-            BackgroundTransparency = 0,
-            BorderSizePixel = 0,
-            ZIndex = 1,
-        })
-        Top.Parent = Root
+    local AuroraGrad
 
-        local Bottom = Create("Frame", {
-            Size = UDim2.fromScale(1, 0.5),
-            Position = UDim2.fromScale(0, 0.5),
-            BackgroundColor3 = BarColor,
-            BackgroundTransparency = 0,
-            BorderSizePixel = 0,
-            ZIndex = 1,
-        })
-        Bottom.Parent = Root
+    if FX.Aurora then
 
-        local Line = Create("Frame", {
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = UDim2.fromScale(0.5, 0.5),
-            Size = UDim2.new(0, 0, 0, 2),
+        local Aurora = Create("Frame", {
+            Name = "NormalAurora",
+            Size = UDim2.fromScale(1, 1),
             BackgroundColor3 = Color3.new(1, 1, 1),
             BackgroundTransparency = 0,
             BorderSizePixel = 0,
-            ZIndex = 3,
+            ZIndex = 0,
         })
-        Line.Parent = Root
+        Aurora.Parent = Main
+        AddCorner(Aurora, 16)
 
-        local LineGrad = Instance.new("UIGradient")
-        LineGrad.Color = ColorSequence.new({
+        AuroraGrad = Instance.new("UIGradient")
+        AuroraGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Theme.Stroke1),
+            ColorSequenceKeypoint.new(0.5, Theme.Stroke3),
+            ColorSequenceKeypoint.new(1, Theme.Stroke2),
+        })
+        AuroraGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.9),
+            NumberSequenceKeypoint.new(0.5, 0.96),
+            NumberSequenceKeypoint.new(1, 0.9),
+        })
+        AuroraGrad.Parent = Aurora
+
+    end
+
+    ----------------------------------------------------
+    -- FX LAYER (ไม่รับคลิก)
+    ----------------------------------------------------
+
+    local Layer = Create("Frame", {
+        Name = "NormalFX",
+        Size = UDim2.fromScale(1, 1),
+        BackgroundTransparency = 1,
+        ClipsDescendants = true,
+        ZIndex = 25,
+    })
+    Layer.Parent = Main
+
+    -- HUD brackets
+    local Brackets = {}
+
+    if FX.Brackets then
+
+        local function Bracket(ax, ay)
+
+            local Pad = 8
+            local Long, Thick = 16, 2
+
+            local HFrame = Create("Frame", {
+                AnchorPoint = Vector2.new(ax, ay),
+                Position = UDim2.new(ax, ax == 0 and Pad or -Pad, ay, ay == 0 and Pad or -Pad),
+                Size = UDim2.fromOffset(Long, Thick),
+                BackgroundColor3 = Theme.FxLight,
+                BackgroundTransparency = 0.3,
+                BorderSizePixel = 0,
+                ZIndex = 30,
+            })
+            HFrame.Parent = Layer
+
+            local VFrame = Create("Frame", {
+                AnchorPoint = Vector2.new(ax, ay),
+                Position = UDim2.new(ax, ax == 0 and Pad or -Pad, ay, ay == 0 and Pad or -Pad),
+                Size = UDim2.fromOffset(Thick, Long),
+                BackgroundColor3 = Theme.FxLight,
+                BackgroundTransparency = 0.3,
+                BorderSizePixel = 0,
+                ZIndex = 30,
+            })
+            VFrame.Parent = Layer
+
+            table.insert(Brackets, HFrame)
+            table.insert(Brackets, VFrame)
+
+        end
+
+        Bracket(0, 0)
+        Bracket(1, 0)
+        Bracket(0, 1)
+        Bracket(1, 1)
+
+    end
+
+    -- Particles
+    local Particles = {}
+
+    if FX.Particles then
+
+        local Colors = { Theme.FxLight, Theme.FxMid, Theme.FxSilver, Theme.FxWhite }
+
+        for _ = 1, 16 do
+
+            local Dot = math.random(2, 3)
+
+            local Frame = Create("Frame", {
+                Size = UDim2.fromOffset(Dot, Dot),
+                BackgroundColor3 = Colors[math.random(#Colors)],
+                BackgroundTransparency = 1,
+                BorderSizePixel = 0,
+                ZIndex = 1,
+            })
+            Frame.Parent = Layer
+            AddCorner(Frame, 3)
+
+            table.insert(Particles, {
+                Frame = Frame,
+                X = 0.04 + math.random() * 0.92,
+                Speed = 0.03 + math.random() * 0.05,
+                Offset = math.random(),
+                Sway = 3 + math.random() * 7,
+                Rate = 0.7 + math.random() * 1.3,
+                Phase = math.random() * math.pi * 2,
+            })
+
+        end
+
+    end
+
+    -- Scan sweep
+    local ScanBand
+
+    if FX.Scan then
+
+        ScanBand = Create("Frame", {
+            AnchorPoint = Vector2.new(0, 0.5),
+            Position = UDim2.new(0, 0, 0, 0),
+            Size = UDim2.new(1, 0, 0, 70),
+            BackgroundColor3 = Theme.FxLight,
+            BackgroundTransparency = 0,
+            BorderSizePixel = 0,
+            Visible = false,
+            ZIndex = 2,
+        })
+        ScanBand.Parent = Layer
+
+        local Grad = Instance.new("UIGradient")
+        Grad.Rotation = 90
+        Grad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.5, 0.93),
+            NumberSequenceKeypoint.new(1, 1),
+        })
+        Grad.Parent = ScanBand
+
+    end
+
+    -- Header line
+    local HeaderGrad
+
+    if FX.HeaderLine then
+
+        local Line = Create("Frame", {
+            Name = "HeaderLine",
+            AnchorPoint = Vector2.new(0, 1),
+            Position = UDim2.new(0, 0, 1, 0),
+            Size = UDim2.new(1, 0, 0, 2),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BorderSizePixel = 0,
+            ZIndex = 4,
+        })
+        Line.Parent = Header
+
+        HeaderGrad = Instance.new("UIGradient")
+        HeaderGrad.Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0, Theme.Stroke1),
             ColorSequenceKeypoint.new(0.5, Theme.Stroke2),
             ColorSequenceKeypoint.new(1, Theme.Stroke3),
         })
-        LineGrad.Parent = Line
-
-        local LineGlow = AddStroke(Line, Theme.Stroke1, 0.6, 3)
-
-        local Text = string.upper(tostring(Window.Title or "KRYVEX"))
-
-        local Label = Create("TextLabel", {
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = UDim2.new(0.5, 0, 0.5, -34),
-            Size = UDim2.new(1, 0, 0, 50),
-            BackgroundTransparency = 1,
-            Text = "",
-            TextColor3 = Theme.Text,
-            TextSize = 40,
-            Font = Enum.Font.GothamBlack,
-            ZIndex = 4,
+        HeaderGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.9),
+            NumberSequenceKeypoint.new(0.5, 0),
+            NumberSequenceKeypoint.new(1, 0.9),
         })
-        Label.Parent = Root
-
-        local LabelStroke = AddStroke(Label, Theme.Primary, 0.55, 2)
-
-        local Sub = Create("TextLabel", {
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = UDim2.new(0.5, 0, 0.5, 24),
-            Size = UDim2.new(1, 0, 0, 20),
-            BackgroundTransparency = 1,
-            Text = string.upper(tostring(Window.Subtitle or "")),
-            TextColor3 = Theme.Primary,
-            TextTransparency = 1,
-            TextSize = 13,
-            Font = Enum.Font.GothamMedium,
-            ZIndex = 4,
-        })
-        Sub.Parent = Root
-
-        -- 1) line shoots open
-        Tw(Line, 0.55, { Size = UDim2.new(0.42, 0, 0, 2) }, Enum.EasingStyle.Quart)
-        task.wait(0.5)
-
-        -- 2) type the title
-        local Count = utf8.len(Text) or #Text
-
-        for Index = 1, Count do
-            if not Root.Parent then return end
-
-            local Cut = utf8.offset(Text, Index + 1)
-            Label.Text = Cut and string.sub(Text, 1, Cut - 1) or Text
-
-            task.wait(0.06)
-        end
-
-        Tw(Sub, 0.35, { TextTransparency = 0 })
-
-        -- 3) glitch
-        local Palette = { Theme.Stroke1, Theme.Stroke3, Theme.Text }
-
-        for Step = 1, 7 do
-            if not Root.Parent then return end
-
-            Label.Position = UDim2.new(0.5, math.random(-7, 7), 0.5, -34 + math.random(-2, 2))
-            Label.TextColor3 = Palette[(Step % #Palette) + 1]
-
-            task.wait(0.045)
-        end
-
-        Label.Position = UDim2.new(0.5, 0, 0.5, -34)
-        Label.TextColor3 = Theme.Text
-
-        task.wait(0.35)
-
-        -- 4) fade text, open the doors
-        Tw(Label, 0.25, { TextTransparency = 1 })
-        Tw(LabelStroke, 0.25, { Transparency = 1 })
-        Tw(Sub, 0.25, { TextTransparency = 1 })
-        Tw(Line, 0.25, { BackgroundTransparency = 1 })
-        Tw(LineGlow, 0.25, { Transparency = 1 })
-
-        task.wait(0.2)
-
-        Tw(Top, 0.75, { Position = UDim2.fromScale(0, -0.5) }, Enum.EasingStyle.Quart, Enum.EasingDirection.InOut)
-        Tw(Bottom, 0.75, { Position = UDim2.fromScale(0, 1) }, Enum.EasingStyle.Quart, Enum.EasingDirection.InOut)
-
-        task.wait(0.85)
-
-        if Root.Parent then
-            Root:Destroy()
-        end
+        HeaderGrad.Parent = Line
 
     end
 
-    --------------------------------------------------------
-    -- 3) IN-WINDOW FX
-    --------------------------------------------------------
+    -- Title shine
+    local TitleGrad
 
-    function KRYVEX.BuildNormalFX(Window, Main, Header, Title)
+    if FX.TitleShine and Title then
 
-        local Theme = KRYVEX.Theme
-        local FX = KRYVEX.NormalFX
-        local GuiService = game:GetService("GuiService")
-
-        local function Alive()
-            return Main.Parent ~= nil and not Window.Destroyed
-        end
-
-        if FX.Intro and not (FX.IntroOnce and KRYVEX.NormalIntroPlayed) then
-            KRYVEX.NormalIntroPlayed = true
-
-            task.spawn(function()
-                local ok, err = pcall(KRYVEX.BuildNormalIntro, Main.Parent, Window, Theme)
-                if not ok then
-                    warn("[Kryvex Hub] Normal intro error: " .. tostring(err))
-                end
-            end)
-        end
-
-        local Layer = Create("Frame", {
-            Name = "NormalFX",
-            Size = UDim2.fromScale(1, 1),
-            BackgroundTransparency = 1,
-            ClipsDescendants = true,
-            ZIndex = 25,
+        TitleGrad = Instance.new("UIGradient")
+        TitleGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Theme.Text),
+            ColorSequenceKeypoint.new(0.5, Theme.FxLight),
+            ColorSequenceKeypoint.new(1, Theme.Text),
         })
-        Layer.Parent = Main
-
-        ----------------------------------------------------
-        -- AURORA ORBS (behind everything)
-        ----------------------------------------------------
-
-        local Orbs = {}
-
-        if FX.Aurora then
-
-            local function MakeOrb(color, size, cx, cy, ax, ay, speed, phase)
-
-                local layers = {}
-
-                for i = 1, 5 do
-
-                    local s = size * (1.05 - (i - 1) * 0.19)
-
-                    local f = Create("Frame", {
-                        AnchorPoint = Vector2.new(0.5, 0.5),
-                        Size = UDim2.fromOffset(s, s),
-                        BackgroundColor3 = color,
-                        BackgroundTransparency = 0.95,
-                        BorderSizePixel = 0,
-                        ZIndex = 0,
-                    })
-
-                    f.Parent = Main
-                    AddCorner(f, s / 2)
-
-                    layers[i] = f
-
-                end
-
-                table.insert(Orbs, {
-                    Layers = layers,
-                    CX = cx, CY = cy,
-                    AX = ax, AY = ay,
-                    Speed = speed,
-                    Phase = phase,
-                })
-
-            end
-
-            MakeOrb(Theme.Stroke1, 280, 0.25, 0.3, 0.12, 0.10, 0.35, 0)
-            MakeOrb(Theme.Stroke2, 240, 0.78, 0.65, 0.10, 0.12, 0.28, 2.1)
-            MakeOrb(Theme.Stroke3, 170, 0.55, 0.95, 0.15, 0.06, 0.45, 4.2)
-
-        end
-
-        ----------------------------------------------------
-        -- HEADER LINE
-        ----------------------------------------------------
-
-        local HeaderGrad
-
-        if FX.HeaderLine then
-
-            local Line = Create("Frame", {
-                Name = "NeonHeaderLine",
-                AnchorPoint = Vector2.new(0, 1),
-                Position = UDim2.new(0, 0, 1, 0),
-                Size = UDim2.new(1, 0, 0, 2),
-                BackgroundColor3 = Color3.new(1, 1, 1),
-                BorderSizePixel = 0,
-                ZIndex = 4,
-            })
-
-            Line.Parent = Header
-
-            HeaderGrad = Instance.new("UIGradient")
-
-            HeaderGrad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Theme.Stroke1),
-                ColorSequenceKeypoint.new(0.5, Theme.Stroke2),
-                ColorSequenceKeypoint.new(1, Theme.Stroke3),
-            })
-
-            HeaderGrad.Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 0.9),
-                NumberSequenceKeypoint.new(0.5, 0),
-                NumberSequenceKeypoint.new(1, 0.9),
-            })
-
-            HeaderGrad.Parent = Line
-
-        end
-
-        ----------------------------------------------------
-        -- TITLE SHINE
-        ----------------------------------------------------
-
-        local TitleGrad
-
-        if FX.TitleShine and Title then
-
-            TitleGrad = Instance.new("UIGradient")
-
-            TitleGrad.Color = ColorSequence.new({
-                ColorSequenceKeypoint.new(0, Theme.Text),
-                ColorSequenceKeypoint.new(0.35, Theme.Primary),
-                ColorSequenceKeypoint.new(0.65, Theme.Stroke2),
-                ColorSequenceKeypoint.new(1, Theme.Text),
-            })
-
-            TitleGrad.Parent = Title
-
-        end
-
-        ----------------------------------------------------
-        -- CORNER BRACKETS
-        ----------------------------------------------------
-
-        local Brackets = {}
-
-        if FX.Brackets then
-
-            local Len, Thick, Pad = 16, 2, 6
-
-            local function Piece(anchor, pos, size)
-
-                local f = Create("Frame", {
-                    AnchorPoint = anchor,
-                    Position = pos,
-                    Size = size,
-                    BackgroundColor3 = Theme.Primary,
-                    BackgroundTransparency = 0.25,
-                    BorderSizePixel = 0,
-                    ZIndex = 30,
-                })
-
-                f.Parent = Layer
-                table.insert(Brackets, f)
-
-            end
-
-            local H = UDim2.fromOffset(Len, Thick)
-            local V = UDim2.fromOffset(Thick, Len)
-
-            -- top-left
-            Piece(Vector2.new(0, 0), UDim2.new(0, Pad, 0, Pad), H)
-            Piece(Vector2.new(0, 0), UDim2.new(0, Pad, 0, Pad), V)
-            -- top-right
-            Piece(Vector2.new(1, 0), UDim2.new(1, -Pad, 0, Pad), H)
-            Piece(Vector2.new(1, 0), UDim2.new(1, -Pad, 0, Pad), V)
-            -- bottom-left
-            Piece(Vector2.new(0, 1), UDim2.new(0, Pad, 1, -Pad), H)
-            Piece(Vector2.new(0, 1), UDim2.new(0, Pad, 1, -Pad), V)
-            -- bottom-right
-            Piece(Vector2.new(1, 1), UDim2.new(1, -Pad, 1, -Pad), H)
-            Piece(Vector2.new(1, 1), UDim2.new(1, -Pad, 1, -Pad), V)
-
-        end
-
-        ----------------------------------------------------
-        -- SCANLINE
-        ----------------------------------------------------
-
-        local Scan
-
-        if FX.Scanline then
-
-            Scan = Create("Frame", {
-                Name = "Scanline",
-                Size = UDim2.new(1, 0, 0, 70),
-                Position = UDim2.new(0, 0, -0.2, 0),
-                BackgroundColor3 = Theme.Primary,
-                BackgroundTransparency = 0,
-                BorderSizePixel = 0,
-                ZIndex = 2,
-            })
-
-            Scan.Parent = Layer
-
-            local ScanGrad = Instance.new("UIGradient")
-
-            ScanGrad.Rotation = 90
-
-            ScanGrad.Transparency = NumberSequence.new({
-                NumberSequenceKeypoint.new(0, 1),
-                NumberSequenceKeypoint.new(0.5, 0.93),
-                NumberSequenceKeypoint.new(1, 1),
-            })
-
-            ScanGrad.Parent = Scan
-
-        end
-
-        ----------------------------------------------------
-        -- PARTICLES
-        ----------------------------------------------------
-
-        local Motes = {}
-
-        if FX.Particles then
-
-            local Colors = { Theme.Primary, Theme.Stroke2, Theme.Stroke3, Theme.FxLight }
-
-            for _ = 1, 16 do
-
-                local Dot = math.random(2, 3)
-
-                local Frame = Create("Frame", {
-                    Size = UDim2.fromOffset(Dot, Dot),
-                    BackgroundColor3 = Colors[math.random(#Colors)],
-                    BackgroundTransparency = 1,
-                    BorderSizePixel = 0,
-                    ZIndex = 1,
-                })
-
-                Frame.Parent = Layer
-                AddCorner(Frame, 3)
-
-                table.insert(Motes, {
-                    Frame = Frame,
-                    X = 0.04 + math.random() * 0.92,
-                    Speed = 0.03 + math.random() * 0.05,
-                    Offset = math.random(),
-                    Sway = 3 + math.random() * 8,
-                    SwayRate = 0.7 + math.random() * 1.3,
-                    Phase = math.random() * math.pi * 2,
-                })
-
-            end
-
-        end
-
-        ----------------------------------------------------
-        -- CLICK RIPPLE
-        ----------------------------------------------------
-
-        if FX.Ripple then
-
-            Main.InputBegan:Connect(function(input)
-
-                if input.UserInputType ~= Enum.UserInputType.MouseButton1
-                    and input.UserInputType ~= Enum.UserInputType.Touch
-                then
-                    return
-                end
-
-                pcall(function()
-
-                    local inset = GuiService:GetGuiInset()
-
-                    local p =
-                        Vector2.new(input.Position.X, input.Position.Y)
-                        + inset
-                        - Main.AbsolutePosition
-
-                    local Ring = Create("Frame", {
-                        AnchorPoint = Vector2.new(0.5, 0.5),
-                        Position = UDim2.fromOffset(p.X, p.Y),
-                        Size = UDim2.fromOffset(0, 0),
-                        BackgroundTransparency = 1,
-                        BorderSizePixel = 0,
-                        ZIndex = 100,
-                    })
-
-                    Ring.Parent = Layer
-                    AddCorner(Ring, 100)
-
-                    local Stroke = AddStroke(Ring, Theme.Primary, 0.15, 2)
-
-                    PlayTween(Ring, 0.5, { Size = UDim2.fromOffset(110, 110) }, Enum.EasingStyle.Quad)
-                    PlayTween(Stroke, 0.5, { Transparency = 1 })
-
-                    task.delay(0.55, function()
-                        Ring:Destroy()
-                    end)
-
-                end)
-
-            end)
-
-        end
-
-        ----------------------------------------------------
-        -- MAIN LOOP
-        ----------------------------------------------------
-
-        local MainStroke = FX.BorderPulse and Main:FindFirstChildOfClass("UIStroke") or nil
-
-        local Clock = 0
-        local Conn
-
-        Conn = RunService.Heartbeat:Connect(function(dt)
-
-            if not Alive() then
-                Conn:Disconnect()
-                return
-            end
-
-            Clock = Clock + dt
-
-            if HeaderGrad then
-                HeaderGrad.Offset = Vector2.new((Clock * 0.4) % 2 - 1, 0)
-            end
-
-            if TitleGrad then
-                TitleGrad.Offset = Vector2.new((Clock * 0.45) % 2 - 1, 0)
-            end
-
-            if MainStroke then
-                MainStroke.Thickness = 1.7 + 0.9 * (0.5 + 0.5 * math.sin(Clock * 1.8))
-            end
-
-            for _, Orb in ipairs(Orbs) do
-
-                local Position = UDim2.new(
-                    Orb.CX + math.sin(Clock * Orb.Speed + Orb.Phase) * Orb.AX, 0,
-                    Orb.CY + math.cos(Clock * Orb.Speed * 0.8 + Orb.Phase) * Orb.AY, 0
-                )
-
-                for _, Layer in ipairs(Orb.Layers) do
-                    Layer.Position = Position
-                end
-
-            end
-
-            for _, Bracket in ipairs(Brackets) do
-                Bracket.BackgroundTransparency = 0.25 + 0.2 * math.sin(Clock * 2)
-            end
-
-            if Scan then
-                Scan.Position = UDim2.new(0, 0, (Clock * 0.14) % 1.4 - 0.2, 0)
-            end
-
-            for _, Mote in ipairs(Motes) do
-
-                local Fraction = (Clock * Mote.Speed + Mote.Offset) % 1
-
-                Mote.Frame.Position = UDim2.new(
-                    Mote.X,
-                    math.sin(Clock * Mote.SwayRate + Mote.Phase) * Mote.Sway,
-                    1 - Fraction,
-                    0
-                )
-
-                Mote.Frame.BackgroundTransparency = 0.45 + 0.5 * math.abs(Fraction * 2 - 1)
-
-            end
-
-        end)
+        TitleGrad.Parent = Title
 
     end
 
-    --------------------------------------------------------
-    -- 4) HOOK: Normal theme uses the new FX, others unchanged
-    --------------------------------------------------------
+    local MainStroke = FX.BorderPulse and Main:FindFirstChildOfClass("UIStroke") or nil
 
-    local OriginalSeasonFX = KRYVEX.BuildSeasonFX
+    ----------------------------------------------------
+    -- LOOP
+    ----------------------------------------------------
 
-    function KRYVEX.BuildSeasonFX(Window, Main, Header, Title)
+    local Clock = 0
+    local Conn
 
-        if KRYVEX.Theme
-            and KRYVEX.Theme.ThemeId == "normal"
-            and KRYVEX.ThemeSettings.Animation
-        then
+    Conn = RunService.Heartbeat:Connect(function(dt)
 
-            local ok, err = pcall(KRYVEX.BuildNormalFX, Window, Main, Header, Title)
-
-            if not ok then
-                warn("[Kryvex Hub] Normal FX error: " .. tostring(err))
-            end
-
+        if not Alive() then
+            Conn:Disconnect()
             return
+        end
+
+        Clock = Clock + dt
+
+        if AuroraGrad then
+            AuroraGrad.Rotation = (Clock * 6) % 360
+        end
+
+        if HeaderGrad then
+            HeaderGrad.Offset = Vector2.new((Clock * 0.4) % 2 - 1, 0)
+        end
+
+        if TitleGrad then
+            TitleGrad.Offset = Vector2.new((Clock * 0.45) % 2 - 1, 0)
+        end
+
+        if MainStroke then
+            MainStroke.Thickness = 1.6 + 0.7 * (0.5 + 0.5 * math.sin(Clock * 1.9))
+        end
+
+        for _, Part in ipairs(Brackets) do
+            Part.BackgroundTransparency = 0.25 + 0.3 * (0.5 + 0.5 * math.sin(Clock * 2.2))
+        end
+
+        for _, P in ipairs(Particles) do
+
+            local Fraction = (Clock * P.Speed + P.Offset) % 1
+
+            P.Frame.Position = UDim2.new(
+                P.X,
+                math.sin(Clock * P.Rate + P.Phase) * P.Sway,
+                1 - Fraction,
+                0
+            )
+
+            P.Frame.BackgroundTransparency = 0.45 + 0.5 * math.abs(Fraction * 2 - 1)
 
         end
 
-        return OriginalSeasonFX(Window, Main, Header, Title)
+        if ScanBand then
 
-    end
+            local Progress = (Clock % 9) / 9
 
-    -- OPTIONAL: in CreateWindow > DECORATIONS, swap the clean line to
-    --   if KRYVEX.Theme.Animation == "clean" then Deco = { Header = "zap", Corner = "sparkles" } end
+            if Progress < 0.4 then
+                ScanBand.Visible = true
+                ScanBand.Position = UDim2.new(0, 0, Progress / 0.4, 0)
+            else
+                ScanBand.Visible = false
+            end
 
-    -- if "normal" is already active, refresh so it picks up the new colors
-    if KRYVEX.ThemeMode == "normal" and KRYVEX.SetTheme then
-        KRYVEX:SetTheme("normal")
-    end
+        end
 
-    return KRYVEX
+    end)
 
 end
 
-return ApplyKryvexNormalTheme
+function KRYVEX.BuildSeasonFX(Window, Main, Header, Title)
+
+    local Theme = KRYVEX.Theme
+
+    if Theme and Theme.ThemeId == "normal" then
+
+        if not KRYVEX.ThemeSettings.Animation then
+            return
+        end
+
+        return KRYVEX.BuildNormalFX(Window, Main, Header, Title)
+
+    end
+
+    return OriginalSeasonFX(Window, Main, Header, Title)
+
+end
+
+
+--=========================================================
+-- RETURN
+--=========================================================
+
+return KRYVEX
