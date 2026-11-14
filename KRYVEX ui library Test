@@ -10886,6 +10886,9 @@ end
        RightTitle = "ฝั่งขวา",
        Gap = 8,                     -- ช่องว่างระหว่างฝั่ง
        Ratio = 0.5,                 -- สัดส่วนฝั่งซ้าย (0.5 = ครึ่งๆ)
+       Scroll = true,               -- true = แต่ละฝั่งเลื่อนลงแยกกัน (ค่าเริ่มต้น)
+                                    -- false = สองฝั่งยืดตามเนื้อหา เลื่อนไปกับหน้า
+       Height = nil,                -- กำหนดความสูงแถวเอง (ไม่ใส่ = เต็มพื้นที่ที่เหลือ)
    })
 
    Cols.Left:CreateToggle({ Name = "ออโต้", Callback = function(v) end })
@@ -11108,15 +11111,66 @@ function KRYVEX.AttachLayout(Tab)
 
         local Gap = config.Gap or 8
         local Ratio = math.clamp(config.Ratio or 0.5, 0.2, 0.8)
+        local Scroll = config.Scroll ~= false
+
+        -- ความสูงที่ถูกของข้างบนกินไปแล้ว (หัวข้อ / ปุ่มที่สร้างก่อนแถวนี้)
+        local Above = 0
+
+        for _, Child in ipairs(Page:GetChildren()) do
+            if Child:IsA("GuiObject") then
+                Above = Above + Child.Size.Y.Offset + 8
+            end
+        end
+
+        local function FitHeight()
+
+            if config.Height then
+                return config.Height
+            end
+
+            return math.max(140, Page.AbsoluteSize.Y - 24 - Above)
+
+        end
 
         local Row = Create("Frame", {
             Name = "ColumnsRow",
-            Size = UDim2.new(1, 0, 0, 0),
-            AutomaticSize = Enum.AutomaticSize.Y,
+            Size = UDim2.new(1, 0, 0, Scroll and FitHeight() or 0),
+            AutomaticSize = Scroll
+                and Enum.AutomaticSize.None
+                or Enum.AutomaticSize.Y,
             BackgroundTransparency = 1,
             BorderSizePixel = 0,
         })
         Row.Parent = Page
+
+        -- ปรับความสูงตามหน้าต่าง (รีไซส์ / เปิดหน้าต่าง)
+        if Scroll and not config.Height then
+
+            local Sync
+
+            Sync = Page:GetPropertyChangedSignal("AbsoluteSize"):Connect(function()
+
+                if not Row.Parent then
+                    Sync:Disconnect()
+                    return
+                end
+
+                -- ตอนย่อหน้าต่าง หน้าจะเตี้ยมาก ข้ามไปก่อน
+                if Page.AbsoluteSize.Y < 100 then
+                    return
+                end
+
+                Row.Size = UDim2.new(1, 0, 0, FitHeight())
+
+            end)
+
+            task.defer(function()
+                if Row.Parent and Page.AbsoluteSize.Y >= 100 then
+                    Row.Size = UDim2.new(1, 0, 0, FitHeight())
+                end
+            end)
+
+        end
 
         local RowLayout = Instance.new("UIListLayout")
         RowLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -11127,15 +11181,42 @@ function KRYVEX.AttachLayout(Tab)
 
         local function MakeColumn(Index, Share)
 
-            local ColFrame = Create("Frame", {
-                Name = "Column" .. Index,
-                LayoutOrder = Index,
-                Size = UDim2.new(Share, -Gap / 2, 0, 0),
-                AutomaticSize = Enum.AutomaticSize.Y,
-                BackgroundTransparency = 1,
-                BorderSizePixel = 0,
-            })
-            ColFrame.Parent = Row
+            local ColFrame
+
+            if Scroll then
+
+                ColFrame = Create("ScrollingFrame", {
+                    Name = "Column" .. Index,
+                    LayoutOrder = Index,
+                    Size = UDim2.new(Share, -Gap / 2, 1, 0),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ScrollBarThickness = 2,
+                    ScrollBarImageColor3 = KRYVEX.Theme.Primary,
+                    ScrollingDirection = Enum.ScrollingDirection.Y,
+                    CanvasSize = UDim2.new(),
+                    AutomaticCanvasSize = Enum.AutomaticSize.Y,
+                })
+                ColFrame.Parent = Row
+
+                local ColPadding = Instance.new("UIPadding")
+                ColPadding.PaddingRight = UDim.new(0, 6)
+                ColPadding.PaddingBottom = UDim.new(0, 4)
+                ColPadding.Parent = ColFrame
+
+            else
+
+                ColFrame = Create("Frame", {
+                    Name = "Column" .. Index,
+                    LayoutOrder = Index,
+                    Size = UDim2.new(Share, -Gap / 2, 0, 0),
+                    AutomaticSize = Enum.AutomaticSize.Y,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                })
+                ColFrame.Parent = Row
+
+            end
 
             local ColLayout = Instance.new("UIListLayout")
             ColLayout.SortOrder = Enum.SortOrder.LayoutOrder
