@@ -1,0 +1,995 @@
+--====================================================
+-- KRYVEX HUB | THE FLASH - SPEED FORCE V6.6
+-- Roblox Studio - LocalScript
+-- F = Toggle | Q = Cycle Tier | C = Screen Color
+--====================================================
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local Debris = game:GetService("Debris")
+local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+
+local Player = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
+--====================================================
+-- CONFIG
+--====================================================
+
+local Config = {
+	Tiers = {
+		{ Name = "วิ่งเร็ว",      Speed = 120, FOV = 84,  Color = Color3.fromRGB(255, 35, 40) },
+		{ Name = "วิ่งเร็วจัด",   Speed = 250, FOV = 96,  Color = Color3.fromRGB(255, 200, 40) },
+		{ Name = "วิ่งเร็วโครต", Speed = 500, FOV = 108, Color = Color3.fromRGB(110, 190, 255) },
+	},
+	GroundInterval = 0.3,
+
+	-- สีเต็มจอ: ค่าน้อย = เข้ม, ค่ามาก = จาง (0.55 เข้มมาก, 0.85 จางๆ)
+	ScreenTint = 0.72, -- ตอนวิ่ง
+	IdleTint = 0.88,   -- ตอนยืนนิ่ง (ตั้ง 1 ถ้าไม่เอา)
+
+	-- SOUND
+	Volume = 1,
+	Sounds = {
+		Thunder = "rbxasset://sounds/impact_explosion_03.mp3", -- ตอนแปลงร่าง / เปลี่ยน tier
+		Zap     = "rbxassetid://3462469467",                   -- ตอนวิ่ง
+		Boom    = "rbxasset://sounds/impact_explosion_03.mp3", -- sonic boom
+	},
+}
+
+local State = {
+	Active = false,
+	Tier = 1,
+	Ghost = true,
+	Screen = true, -- สีหน้าจอ เปิด/ปิด
+}
+
+local Character, Humanoid, Root
+local OriginalSpeed = 16
+local OriginalFOV = 70
+local FOVReturning = false
+local WasMoving = false
+local GhostApplied = false
+
+local Effects = {}
+local Emitters = {}
+local OriginalCollision = {}
+local DustEmitter = nil
+
+local WHITE = Color3.new(1, 1, 1)
+local BLACK = Color3.new(0, 0, 0)
+
+local FloorParams = RaycastParams.new()
+FloorParams.FilterType = Enum.RaycastFilterType.Exclude
+
+--====================================================
+-- HELPERS
+--====================================================
+
+local function Theme()
+	return Config.Tiers[State.Tier].Color
+end
+
+local function Tween(obj, time, props, style)
+	local t = TweenService:Create(
+		obj,
+		TweenInfo.new(time, style or Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+		props
+	)
+	t:Play()
+	return t
+end
+
+local function RandVec(j)
+	return Vector3.new(
+		(math.random() - 0.5) * 2 * j,
+		(math.random() - 0.5) * 2 * j,
+		(math.random() - 0.5) * 2 * j
+	)
+end
+
+local function SetupCharacter(char)
+	Character = char
+	Humanoid = char:WaitForChild("Humanoid")
+	Root = char:WaitForChild("HumanoidRootPart")
+	OriginalSpeed = Humanoid.WalkSpeed
+end
+
+SetupCharacter(Player.Character or Player.CharacterAdded:Wait())
+
+local function FeetOffset()
+	if Humanoid.RigType == Enum.HumanoidRigType.R15 then
+		return Humanoid.HipHeight + Root.Size.Y / 2
+	end
+	return 3
+end
+
+local function FeetPos()
+	return Root.Position - Vector3.new(0, FeetOffset() - 0.1, 0)
+end
+
+-- container for all world effects
+local FXFolder = workspace:FindFirstChild("KRYVEX_FLASH_FX")
+if FXFolder then FXFolder:Destroy() end
+FXFolder = Instance.new("Folder")
+FXFolder.Name = "KRYVEX_FLASH_FX"
+FXFolder.Parent = workspace
+
+local function NewPart(color, transparency)
+	local p = Instance.new("Part")
+	p.Anchored = true
+	p.CanCollide = false
+	p.CanTouch = false
+	p.CanQuery = false
+	p.CastShadow = false
+	p.Material = Enum.Material.Neon
+	p.Color = color
+	p.Transparency = transparency or 0
+	return p
+end
+
+--====================================================
+-- SOUND
+--====================================================
+
+local function PlaySound(id, volume, pitch, delay)
+	if not id or id == "" or not Root then return end
+
+	local function go()
+		if not Root or not Root.Parent then return end
+		local s = Instance.new("Sound")
+		s.SoundId = id
+		s.Volume = volume * Config.Volume
+		s.PlaybackSpeed = pitch
+		s.RollOffMaxDistance = 200
+		s.Parent = Root
+		s:Play()
+		Debris:AddItem(s, 5)
+	end
+
+	if delay and delay > 0 then
+		task.delay(delay, go)
+	else
+		go()
+	end
+end
+
+-- ตอนแปลงร่าง: เสียงเก่าสามชั้น ทุ้มต่ำ + กลาง + แหลมแตก
+local function ThunderStrike(power)
+	power = power or 1
+	PlaySound(Config.Sounds.Thunder, 2.0 * power, 0.55)
+	PlaySound(Config.Sounds.Thunder, 1.2 * power, 1.4, 0.08)
+	PlaySound(Config.Sounds.Thunder, 0.8 * power, 2.0, 0.18)
+end
+
+-- ตอนวิ่ง: เสียงของมึง
+local function ZapSound()
+	PlaySound(
+		Config.Sounds.Zap,
+		0.25 + State.Tier * 0.1,
+		1.8 + math.random() * 0.9
+	)
+end
+
+--====================================================
+-- POST PROCESSING
+--====================================================
+
+local Bloom = Instance.new("BloomEffect")
+Bloom.Name = "KryvexFlashBloom"
+Bloom.Intensity = 0
+Bloom.Size = 28
+Bloom.Threshold = 0.9
+Bloom.Parent = Lighting
+
+local CC = Instance.new("ColorCorrectionEffect")
+CC.Name = "KryvexFlashCC"
+CC.Parent = Lighting
+
+local Blur = Instance.new("BlurEffect")
+Blur.Name = "KryvexFlashBlur"
+Blur.Size = 0
+Blur.Parent = Lighting
+
+local function SetFX(on)
+	if on then
+		Tween(Bloom, 0.4, { Intensity = 1.2 })
+		Tween(CC, 0.4, {
+			Saturation = 0.25,
+			Contrast = 0.12,
+			TintColor = State.Screen and WHITE:Lerp(Theme(), 0.4) or WHITE,
+		})
+		Tween(Blur, 0.4, { Size = 4 })
+	else
+		Tween(Bloom, 0.4, { Intensity = 0 })
+		Tween(CC, 0.4, { Saturation = 0, Contrast = 0, TintColor = WHITE })
+		Tween(Blur, 0.4, { Size = 0 })
+	end
+end
+
+--====================================================
+-- SCREEN GUI + FULL SCREEN TINT + VIGNETTE
+--====================================================
+
+local old = Player.PlayerGui:FindFirstChild("KRYVEX_FLASH")
+if old then old:Destroy() end
+
+local GUI = Instance.new("ScreenGui")
+GUI.Name = "KRYVEX_FLASH"
+GUI.ResetOnSpawn = false
+GUI.IgnoreGuiInset = true
+GUI.ScreenInsets = Enum.ScreenInsets.None -- คลุมทั้งจอรวมรอยเว้ามือถือ
+GUI.DisplayOrder = 100
+GUI.Parent = Player:WaitForChild("PlayerGui")
+
+-- 🎨 สีเต็มจอทั่วทั้งหน้าจอ
+local Tint = Instance.new("Frame")
+Tint.Name = "ScreenTint"
+Tint.Size = UDim2.fromScale(1, 1)
+Tint.Position = UDim2.fromScale(0, 0)
+Tint.BorderSizePixel = 0
+Tint.Active = false
+Tint.BackgroundColor3 = Theme()
+Tint.BackgroundTransparency = 1
+Tint.Parent = GUI
+
+local Vignette = Instance.new("CanvasGroup")
+Vignette.Name = "Vignette"
+Vignette.Size = UDim2.fromScale(1, 1)
+Vignette.BackgroundTransparency = 1
+Vignette.GroupTransparency = 1
+Vignette.Parent = GUI
+
+local Edges = {}
+local function Edge(pos, size, rot)
+	local f = Instance.new("Frame")
+	f.BorderSizePixel = 0
+	f.Position = pos
+	f.Size = size
+	f.BackgroundColor3 = Theme()
+	f.Active = false
+	local g = Instance.new("UIGradient")
+	g.Rotation = rot
+	g.Transparency = NumberSequence.new(0.35, 1)
+	g.Parent = f
+	f.Parent = Vignette
+	table.insert(Edges, f)
+end
+
+Edge(UDim2.fromScale(0, 0), UDim2.fromScale(1, 0.28), 90)     -- top
+Edge(UDim2.fromScale(0, 0.72), UDim2.fromScale(1, 0.28), 270) -- bottom
+Edge(UDim2.fromScale(0, 0), UDim2.fromScale(0.2, 1), 0)       -- left
+Edge(UDim2.fromScale(0.8, 0), UDim2.fromScale(0.2, 1), 180)   -- right
+
+-- 🎨 ใช้สีหน้าจอตามสถานะ (เปิด/ปิด + วิ่ง/นิ่ง)
+local function ApplyScreen(moving)
+	if not State.Active then return end
+	if State.Screen then
+		Tween(Tint, 0.3, { BackgroundTransparency = moving and Config.ScreenTint or Config.IdleTint })
+		Tween(Vignette, 0.3, { GroupTransparency = moving and 0.35 or 0.75 })
+		Tween(CC, 0.3, { TintColor = WHITE:Lerp(Theme(), 0.4) })
+	else
+		Tween(Tint, 0.3, { BackgroundTransparency = 1 })
+		Tween(Vignette, 0.3, { GroupTransparency = 1 })
+		Tween(CC, 0.3, { TintColor = WHITE })
+	end
+end
+
+--====================================================
+-- WORLD EFFECTS
+--====================================================
+
+local function Shockwave(pos, maxSize, thickness)
+	local ring = NewPart(Theme(), 0.1)
+	ring.Name = "FlashRing"
+	ring.Shape = Enum.PartType.Cylinder
+	ring.Size = Vector3.new(thickness or 0.1, 3, 3)
+	ring.CFrame = CFrame.new(pos) * CFrame.Angles(0, 0, math.rad(90))
+	ring.Parent = FXFolder
+
+	Tween(ring, 0.5, {
+		Size = Vector3.new(0.03, maxSize, maxSize),
+		Transparency = 1,
+	})
+	Debris:AddItem(ring, 0.55)
+end
+
+local function SonicBoom(pos, dir)
+	local ring = NewPart(WHITE, 0.2)
+	ring.Shape = Enum.PartType.Cylinder
+	ring.Size = Vector3.new(0.15, 6, 6)
+	ring.CFrame = CFrame.lookAt(pos, pos + dir) * CFrame.Angles(0, math.rad(90), 0)
+	ring.Parent = FXFolder
+
+	Tween(ring, 0.4, {
+		Size = Vector3.new(0.05, 34, 34),
+		Transparency = 1,
+	})
+	Debris:AddItem(ring, 0.45)
+
+	PlaySound(Config.Sounds.Boom, 1.5, 0.5)
+end
+
+local function Segment(a, b, thick, color)
+	local d = (b - a).Magnitude
+	if d < 0.05 then return end
+	local p = NewPart(color, 0.05)
+	p.Size = Vector3.new(thick, thick, d)
+	p.CFrame = CFrame.lookAt(a, b) * CFrame.new(0, 0, -d / 2)
+	p.Parent = FXFolder
+	Tween(p, 0.18, { Transparency = 1 })
+	Debris:AddItem(p, 0.22)
+end
+
+local function Bolt(a, b, segs, jitter, thick)
+	local pts = { a }
+	for i = 1, segs - 1 do
+		pts[#pts + 1] = a:Lerp(b, i / segs) + RandVec(jitter)
+	end
+	pts[#pts + 1] = b
+
+	for i = 1, #pts - 1 do
+		Segment(pts[i], pts[i + 1], thick, Theme())
+		Segment(pts[i], pts[i + 1], thick * 0.4, WHITE)
+	end
+end
+
+local function BodyBolts()
+	for _ = 1, State.Tier do
+		local origin = Root.Position + RandVec(1.5)
+		local target = Root.Position + RandVec(7) + Vector3.new(0, 1, 0)
+		Bolt(origin, target, 5, 1.4, 0.14)
+	end
+end
+
+local function GroundBolt(dir)
+	local feet = FeetPos()
+	local side = Vector3.new(-dir.Z, 0, dir.X) * (math.random() - 0.5) * 6
+	local target = feet - dir * math.random(8, 18) + side
+	Bolt(feet, target, 6, 1.1, 0.18)
+end
+
+local function AfterImage()
+	for _, part in ipairs(Character:GetChildren()) do
+		if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" and part.Transparency < 1 then
+			local g = NewPart(Theme(), 0.45)
+			g.Size = part.Size
+			g.CFrame = part.CFrame
+			g.Parent = FXFolder
+			Tween(g, 0.4, { Transparency = 1 })
+			Debris:AddItem(g, 0.45)
+		end
+	end
+end
+
+local function SpeedStreak(dir)
+	local len = math.random(6, 14)
+	local offset = Camera.CFrame.RightVector * math.random(-12, 12)
+		+ Vector3.new(0, math.random(-4, 8), 0)
+		+ dir * math.random(10, 30)
+	local pos = Root.Position + offset
+
+	local line = NewPart(WHITE:Lerp(Theme(), 0.4), 0.3)
+	line.Size = Vector3.new(0.05, 0.05, len)
+	line.CFrame = CFrame.lookAt(pos, pos + dir)
+	line.Parent = FXFolder
+
+	local endPos = pos - dir * 50
+	Tween(line, 0.3, {
+		CFrame = CFrame.lookAt(endPos, endPos + dir),
+		Transparency = 1,
+	})
+	Debris:AddItem(line, 0.35)
+end
+
+local function StartBurst()
+	Shockwave(FeetPos(), 14, 0.1)
+	for _ = 1, 4 do
+		local o = Root.Position
+		Bolt(o, o + RandVec(8), 5, 1.5, 0.16)
+	end
+	if DustEmitter then DustEmitter:Emit(25) end
+	-- ออกตัว = เสียงตอนวิ่ง (ของมึง)
+	PlaySound(Config.Sounds.Zap, 0.9, 1.1)
+	PlaySound(Config.Sounds.Zap, 0.6, 2.4, 0.05)
+end
+
+--====================================================
+-- ATTACHED EFFECTS (particles, trails, glow, dust)
+--====================================================
+
+local function MakeTrail(part, p0, p1, life, c0, c1)
+	local a0 = Instance.new("Attachment")
+	a0.Position = p0
+	a0.Parent = part
+	local a1 = Instance.new("Attachment")
+	a1.Position = p1
+	a1.Parent = part
+
+	local trail = Instance.new("Trail")
+	trail.Attachment0 = a0
+	trail.Attachment1 = a1
+	trail.Lifetime = life
+	trail.MinLength = 0.1
+	trail.FaceCamera = true
+	trail.LightEmission = 1
+	trail.Color = ColorSequence.new(c0, c1)
+	trail.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.15),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	trail.WidthScale = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	trail.Parent = part
+
+	table.insert(Effects, a0)
+	table.insert(Effects, a1)
+	table.insert(Effects, trail)
+end
+
+local LimbNames = {
+	"LeftHand", "RightHand", "LeftFoot", "RightFoot",
+	"Left Arm", "Right Arm", "Left Leg", "Right Leg",
+}
+
+local function BuildEffects()
+	local c = Theme()
+	table.clear(Emitters)
+
+	local att = Instance.new("Attachment")
+	att.Name = "FlashAttachment"
+	att.Parent = Root
+	table.insert(Effects, att)
+
+	local sparks = Instance.new("ParticleEmitter")
+	sparks.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	sparks.Color = ColorSequence.new(WHITE, c)
+	sparks.Rate = 60 + State.Tier * 40
+	sparks.Lifetime = NumberRange.new(0.15, 0.4)
+	sparks.Speed = NumberRange.new(6, 16)
+	sparks.SpreadAngle = Vector2.new(180, 180)
+	sparks.Drag = 4
+	sparks.LightEmission = 1
+	sparks.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.4),
+		NumberSequenceKeypoint.new(1, 0),
+	})
+	sparks.Enabled = false
+	sparks.Parent = att
+	table.insert(Effects, sparks)
+	table.insert(Emitters, sparks)
+
+	local smoke = Instance.new("ParticleEmitter")
+	smoke.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	smoke.Color = ColorSequence.new(c)
+	smoke.Transparency = NumberSequence.new(0.75, 1)
+	smoke.Rate = 18
+	smoke.Lifetime = NumberRange.new(0.3, 0.6)
+	smoke.Speed = NumberRange.new(2, 5)
+	smoke.Enabled = false
+	smoke.Parent = att
+	table.insert(Effects, smoke)
+	table.insert(Emitters, smoke)
+
+	-- 🌫️ DUST ที่พื้น (attachment อยู่ที่เท้า)
+	local feetAtt = Instance.new("Attachment")
+	feetAtt.Name = "FlashDustAttachment"
+	feetAtt.Position = Vector3.new(0, -(FeetOffset() - 0.1), 0)
+	feetAtt.Parent = Root
+	table.insert(Effects, feetAtt)
+
+	local dust = Instance.new("ParticleEmitter")
+	dust.Name = "FlashDust"
+	dust.Texture = "rbxasset://textures/particles/smoke_main.dds"
+	dust.Color = ColorSequence.new(Color3.fromRGB(170, 160, 145))
+	dust.Transparency = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 0.45),
+		NumberSequenceKeypoint.new(1, 1),
+	})
+	dust.Size = NumberSequence.new({
+		NumberSequenceKeypoint.new(0, 1.5),
+		NumberSequenceKeypoint.new(1, 5 + State.Tier),
+	})
+	dust.Lifetime = NumberRange.new(0.5, 1)
+	dust.Speed = NumberRange.new(3, 8)
+	dust.SpreadAngle = Vector2.new(35, 35)
+	dust.EmissionDirection = Enum.NormalId.Top
+	dust.Acceleration = Vector3.new(0, 2, 0)
+	dust.Rotation = NumberRange.new(0, 360)
+	dust.RotSpeed = NumberRange.new(-60, 60)
+	dust.Rate = 30 + State.Tier * 25
+	dust.LockedToPart = false
+	dust.Enabled = false
+	dust.Parent = feetAtt
+	table.insert(Effects, dust)
+	DustEmitter = dust
+
+	-- main body trail
+	MakeTrail(Root, Vector3.new(0, 1.4, 0.4), Vector3.new(0, -1.4, 0.4), 0.4, c, WHITE)
+
+	-- limb trails
+	for _, name in ipairs(LimbNames) do
+		local limb = Character:FindFirstChild(name)
+		if limb and limb:IsA("BasePart") then
+			MakeTrail(limb, Vector3.new(0, 0.5, 0), Vector3.new(0, -0.5, 0), 0.25, c, c)
+		end
+	end
+
+	-- glow
+	local hl = Instance.new("Highlight")
+	hl.FillColor = c
+	hl.OutlineColor = WHITE
+	hl.FillTransparency = 0.85
+	hl.OutlineTransparency = 0.1
+	hl.Parent = Character
+	table.insert(Effects, hl)
+
+	local light = Instance.new("PointLight")
+	light.Color = c
+	light.Brightness = 3
+	light.Range = 18
+	light.Parent = Root
+	table.insert(Effects, light)
+end
+
+local function ClearEffects()
+	for _, obj in ipairs(Effects) do
+		if obj and obj.Parent then
+			obj:Destroy()
+		end
+	end
+	table.clear(Effects)
+	table.clear(Emitters)
+	DustEmitter = nil
+end
+
+local function SetEmitters(on)
+	for _, e in ipairs(Emitters) do
+		e.Enabled = on
+	end
+end
+
+--====================================================
+-- GHOST WALK
+--====================================================
+
+local function SetGhost(enabled)
+	if not Character then return end
+
+	if enabled then
+		table.clear(OriginalCollision)
+		for _, part in ipairs(Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				OriginalCollision[part] = part.CanCollide
+				part.CanCollide = false
+			end
+		end
+		GhostApplied = true
+	else
+		GhostApplied = false
+		for part, original in pairs(OriginalCollision) do
+			if part and part.Parent then
+				part.CanCollide = original
+			end
+		end
+		table.clear(OriginalCollision)
+	end
+end
+
+-- Humanoid resets CanCollide, so force it every physics step
+RunService.Stepped:Connect(function()
+	if GhostApplied then
+		for part in pairs(OriginalCollision) do
+			if part and part.Parent then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+--====================================================
+-- ACTIVATE / DEACTIVATE
+--====================================================
+
+local UpdateUI
+
+local function Activate()
+	if State.Active or not Humanoid or not Root then return end
+	State.Active = true
+	FOVReturning = false
+	OriginalFOV = Camera.FieldOfView
+
+	BuildEffects()
+	if State.Ghost then SetGhost(true) end
+	SetFX(true)
+	ApplyScreen(false) -- สีจางๆ ค้างจอตอนเปิดโหมด (ถ้าเปิดสีหน้าจออยู่)
+
+	Shockwave(FeetPos(), 22, 0.1)
+	for _ = 1, 6 do
+		Bolt(Root.Position, Root.Position + RandVec(9), 5, 1.6, 0.18)
+	end
+	if DustEmitter then DustEmitter:Emit(40) end
+
+	-- ⚡ ฟ้าผ่าตอนแปลงร่าง
+	ThunderStrike(1.2)
+
+	UpdateUI()
+end
+
+local function Deactivate()
+	if not State.Active then return end
+	State.Active = false
+	WasMoving = false
+
+	if Humanoid then
+		Humanoid.WalkSpeed = OriginalSpeed
+		Humanoid.CameraOffset = Vector3.zero
+	end
+
+	SetGhost(false)
+	SetFX(false)
+	ClearEffects()
+	Tween(Vignette, 0.3, { GroupTransparency = 1 })
+	Tween(Tint, 0.3, { BackgroundTransparency = 1 })
+	FOVReturning = true
+
+	UpdateUI()
+end
+
+local function SetTier(i)
+	State.Tier = i
+	if State.Active then
+		ClearEffects()
+		BuildEffects()
+		SetFX(true)
+		Shockwave(FeetPos(), 26, 0.12)
+		for _ = 1, 4 do
+			Bolt(Root.Position, Root.Position + RandVec(10), 5, 1.8, 0.2)
+		end
+		if DustEmitter then DustEmitter:Emit(30) end
+		ThunderStrike(0.8 + i * 0.2)
+	end
+	UpdateUI()
+end
+
+local function ToggleScreen()
+	State.Screen = not State.Screen
+	ApplyScreen(WasMoving)
+	UpdateUI()
+end
+
+--====================================================
+-- MAIN LOOP
+--====================================================
+
+local LastAfter, LastBolt, LastRing, LastStreak, LastGround, LastBoom = 0, 0, 0, 0, 0, 0
+local LastZap, LastFloor = 0, 0
+local LastReadout = 0
+local Readout -- set by UI
+
+RunService.RenderStepped:Connect(function(dt)
+	if not Character or not Character.Parent or not Humanoid or not Root then return end
+
+	local now = os.clock()
+	local tier = Config.Tiers[State.Tier]
+	local v = Root.AssemblyLinearVelocity
+	local speed = Vector3.new(v.X, 0, v.Z).Magnitude
+
+	if Readout and now - LastReadout > 0.1 then
+		LastReadout = now
+		Readout.Text = string.format("%d studs/s", speed)
+	end
+
+	-- FOV
+	if State.Active then
+		local frac = math.clamp(speed / tier.Speed, 0, 1)
+		local target = OriginalFOV + (tier.FOV - OriginalFOV) * frac
+		Camera.FieldOfView += (target - Camera.FieldOfView) * (1 - math.exp(-dt * 7))
+	elseif FOVReturning then
+		Camera.FieldOfView += (OriginalFOV - Camera.FieldOfView) * (1 - math.exp(-dt * 7))
+		if math.abs(Camera.FieldOfView - OriginalFOV) < 0.2 then
+			Camera.FieldOfView = OriginalFOV
+			FOVReturning = false
+		end
+	end
+
+	if not State.Active then return end
+
+	-- acceleration ramp
+	Humanoid.WalkSpeed += (tier.Speed - Humanoid.WalkSpeed) * (1 - math.exp(-dt * 5))
+
+	local dir = Humanoid.MoveDirection
+	local moving = dir.Magnitude > 0.1
+
+	if moving ~= WasMoving then
+		SetEmitters(moving)
+		ApplyScreen(moving) -- 🎨 วิ่ง = เข้ม / นิ่ง = จาง / ปิดสี = ไม่มี
+		if moving then StartBurst() end
+		WasMoving = moving
+	end
+
+	if moving then
+		dir = dir.Unit
+
+		-- camera shake
+		local s = 0.025 * State.Tier
+		Humanoid.CameraOffset = Vector3.new(
+			(math.random() - 0.5) * s * 2,
+			(math.random() - 0.5) * s * 2,
+			0
+		)
+
+		-- 🌫️ สีฝุ่นตามสีพื้นที่เหยียบ
+		if now - LastFloor > 0.15 then
+			LastFloor = now
+			FloorParams.FilterDescendantsInstances = { Character, FXFolder }
+			local hit = workspace:Raycast(Root.Position, Vector3.new(0, -10, 0), FloorParams)
+			if hit and DustEmitter then
+				local base
+				if hit.Instance:IsA("Terrain") then
+					base = Color3.fromRGB(150, 130, 100)
+				else
+					base = hit.Instance.Color
+				end
+				DustEmitter.Color = ColorSequence.new(
+					base:Lerp(Color3.fromRGB(200, 200, 200), 0.45)
+				)
+			end
+		end
+
+		local grounded = Humanoid.FloorMaterial ~= Enum.Material.Air
+		if DustEmitter then
+			DustEmitter.Enabled = grounded
+		end
+
+		if now - LastAfter > (0.09 - State.Tier * 0.02) then
+			LastAfter = now
+			AfterImage()
+		end
+
+		if now - LastBolt > 0.06 then
+			LastBolt = now
+			BodyBolts()
+		end
+
+		if now - LastGround > 0.1 then
+			LastGround = now
+			GroundBolt(dir)
+		end
+
+		if now - LastRing > Config.GroundInterval then
+			LastRing = now
+			Shockwave(FeetPos(), 11, 0.08)
+			if DustEmitter and grounded then
+				DustEmitter:Emit(8)
+			end
+		end
+
+		if now - LastStreak > 0.04 then
+			LastStreak = now
+			SpeedStreak(dir)
+		end
+
+		-- 🔊 ซ่าตอนวิ่ง (ถี่ขึ้นตาม tier)
+		if now - LastZap > (0.55 - State.Tier * 0.12) then
+			LastZap = now
+			ZapSound()
+		end
+
+		if State.Tier == 3 and speed > tier.Speed * 0.8 and now - LastBoom > 0.6 then
+			LastBoom = now
+			SonicBoom(Root.Position + dir * 4, dir)
+		end
+	else
+		Humanoid.CameraOffset = Humanoid.CameraOffset:Lerp(Vector3.zero, 0.3)
+		if DustEmitter then
+			DustEmitter.Enabled = false
+		end
+	end
+end)
+
+--====================================================
+-- UI (Fluent-ish panel, draggable)
+--====================================================
+
+local DARK = Color3.fromRGB(32, 32, 42)
+
+local Panel = Instance.new("Frame")
+Panel.Name = "Panel"
+Panel.AnchorPoint = Vector2.new(0.5, 1)
+Panel.Position = UDim2.new(0.5, 0, 1, -20)
+Panel.Size = UDim2.fromOffset(270, 232)
+Panel.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+Panel.BackgroundTransparency = 0.08
+Panel.Parent = GUI
+
+local PanelCorner = Instance.new("UICorner")
+PanelCorner.CornerRadius = UDim.new(0, 14)
+PanelCorner.Parent = Panel
+
+local Stroke = Instance.new("UIStroke")
+Stroke.Color = Theme()
+Stroke.Thickness = 2
+Stroke.Parent = Panel
+
+local Header = Instance.new("Frame")
+Header.Size = UDim2.new(1, 0, 0, 34)
+Header.BackgroundTransparency = 1
+Header.Parent = Panel
+
+local Title = Instance.new("TextLabel")
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.fromOffset(12, 0)
+Title.Size = UDim2.new(0.6, 0, 1, 0)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 13
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextColor3 = WHITE
+Title.Text = "⚡ KRYVEX • THE FLASH"
+Title.Parent = Header
+
+Readout = Instance.new("TextLabel")
+Readout.BackgroundTransparency = 1
+Readout.Position = UDim2.new(0.55, 0, 0, 0)
+Readout.Size = UDim2.new(0.45, -12, 1, 0)
+Readout.Font = Enum.Font.GothamMedium
+Readout.TextSize = 12
+Readout.TextXAlignment = Enum.TextXAlignment.Right
+Readout.TextColor3 = Color3.fromRGB(190, 190, 205)
+Readout.Text = "0 studs/s"
+Readout.Parent = Header
+
+local function MakeButton(text, parent)
+	local b = Instance.new("TextButton")
+	b.BackgroundColor3 = DARK
+	b.TextColor3 = WHITE
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 13
+	b.Text = text
+	b.AutoButtonColor = true
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 10)
+	c.Parent = b
+	b.Parent = parent
+	return b
+end
+
+local Toggle = MakeButton("", Panel)
+Toggle.Position = UDim2.fromOffset(12, 40)
+Toggle.Size = UDim2.new(1, -24, 0, 48)
+Toggle.TextSize = 14
+
+local TierRow = Instance.new("Frame")
+TierRow.BackgroundTransparency = 1
+TierRow.Position = UDim2.fromOffset(12, 96)
+TierRow.Size = UDim2.new(1, -24, 0, 38)
+TierRow.Parent = Panel
+
+local TierLayout = Instance.new("UIListLayout")
+TierLayout.FillDirection = Enum.FillDirection.Horizontal
+TierLayout.Padding = UDim.new(0, 6)
+TierLayout.Parent = TierRow
+
+local TierButtons = {}
+for i, t in ipairs(Config.Tiers) do
+	local b = MakeButton(t.Name, TierRow)
+	b.Size = UDim2.new(1 / 3, -4, 1, 0)
+	b.TextSize = 12
+	b.TextWrapped = true
+	b.LayoutOrder = i
+	b.MouseButton1Click:Connect(function()
+		SetTier(i)
+	end)
+	TierButtons[i] = b
+end
+
+local GhostBtn = MakeButton("", Panel)
+GhostBtn.Position = UDim2.fromOffset(12, 142)
+GhostBtn.Size = UDim2.new(1, -24, 0, 34)
+
+local ScreenBtn = MakeButton("", Panel)
+ScreenBtn.Position = UDim2.fromOffset(12, 184)
+ScreenBtn.Size = UDim2.new(1, -24, 0, 34)
+
+UpdateUI = function()
+	local c = Theme()
+	Stroke.Color = c
+	Tint.BackgroundColor3 = c
+
+	for _, e in ipairs(Edges) do
+		e.BackgroundColor3 = c
+	end
+
+	if State.Active then
+		Toggle.Text = "⚡ FLASH ACTIVE  [F]"
+		Toggle.BackgroundColor3 = c:Lerp(BLACK, 0.55)
+	else
+		Toggle.Text = "⚡ ACTIVATE THE FLASH  [F]"
+		Toggle.BackgroundColor3 = DARK
+	end
+
+	for i, b in ipairs(TierButtons) do
+		if i == State.Tier then
+			b.BackgroundColor3 = Config.Tiers[i].Color:Lerp(BLACK, 0.45)
+		else
+			b.BackgroundColor3 = DARK
+		end
+	end
+
+	GhostBtn.Text = State.Ghost and "👻 GHOST WALK: ON" or "👻 GHOST WALK: OFF"
+	GhostBtn.BackgroundColor3 = State.Ghost and Color3.fromRGB(60, 40, 90) or DARK
+
+	ScreenBtn.Text = State.Screen and "🎨 สีหน้าจอ: เปิด  [C]" or "🎨 สีหน้าจอ: ปิด  [C]"
+	ScreenBtn.BackgroundColor3 = State.Screen and c:Lerp(BLACK, 0.55) or DARK
+end
+
+Toggle.MouseButton1Click:Connect(function()
+	if State.Active then Deactivate() else Activate() end
+end)
+
+GhostBtn.MouseButton1Click:Connect(function()
+	State.Ghost = not State.Ghost
+	if State.Active then SetGhost(State.Ghost) end
+	UpdateUI()
+end)
+
+ScreenBtn.MouseButton1Click:Connect(ToggleScreen)
+
+UpdateUI()
+
+-- drag
+local dragging, dragStart, startPos
+Header.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1
+		or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = Panel.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement
+		or input.UserInputType == Enum.UserInputType.Touch) then
+		local d = input.Position - dragStart
+		Panel.Position = UDim2.new(
+			startPos.X.Scale, startPos.X.Offset + d.X,
+			startPos.Y.Scale, startPos.Y.Offset + d.Y
+		)
+	end
+end)
+
+-- keybinds
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed then return end
+	if input.KeyCode == Enum.KeyCode.F then
+		if State.Active then Deactivate() else Activate() end
+	elseif input.KeyCode == Enum.KeyCode.Q then
+		SetTier(State.Tier % #Config.Tiers + 1)
+	elseif input.KeyCode == Enum.KeyCode.C then
+		ToggleScreen()
+	end
+end)
+
+--====================================================
+-- RESPAWN
+--====================================================
+
+Player.CharacterAdded:Connect(function(char)
+	if State.Active then
+		Deactivate()
+	end
+	SetupCharacter(char)
+	UpdateUI()
+end)
+
+print("KRYVEX THE FLASH V6.6 READY | F = toggle, Q = tier, C = screen color")
