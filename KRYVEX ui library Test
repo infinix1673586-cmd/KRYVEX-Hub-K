@@ -10881,7 +10881,8 @@ end
    1) หัวข้อใหญ่  Tab:CreateHeading
    2) หัวข้อเล็ก  Tab:CreateSection  (มีไอคอน + ขอบดำ)
    3) สองฝั่ง     Tab:CreateColumns  (เลื่อนแยกกัน)
-   4) แก้บั๊กปิด UI แล้วปุ่มลอยไม่หาย
+   4) แก้บั๊กปิด UI แล้วปุ่มลอยไม่หาย + อนิเมชันตอนปิด
+   4.1) อนิเมชัน: สลับหมวด / กดปุ่ม / เปิด-ปิดสวิตช์ / สไลเดอร์มีจุดขาวใหญ่
    5) ธีม Normal เทาดำอวกาศ + แอนิเมชัน
 
  ถ้าเคยวางแพตช์เก่าไว้ ให้ลบของเก่าออกก่อน
@@ -11367,6 +11368,342 @@ function KRYVEX.AttachLayout(Tab)
     Tab.CreateTwoColumns = Tab.CreateColumns
 
     ----------------------------------------------------
+    -- ANIMATIONS + SLIDER KNOB
+    -- (ต้องอยู่ก่อนส่วนเก็บ Originals เพื่อให้ฝั่งซ้าย/ขวาได้ของใหม่ด้วย)
+    ----------------------------------------------------
+
+    -- ห่อฟังก์ชันสร้างของ: หลังสร้างเสร็จ ส่ง Frame ที่เพิ่งเกิด + ค่าที่คืนมา ให้ Callback ตกแต่งต่อ
+    local function Decorate(Name, Callback)
+
+        local Base = Tab[Name]
+
+        if type(Base) ~= "function" then
+            return
+        end
+
+        Tab[Name] = function(self, ...)
+
+            local Before = Snapshot()
+            local Result = table.pack(Base(self, ...))
+
+            for _, Child in ipairs(NewChildren(Before)) do
+                pcall(Callback, Child, Result[1])
+            end
+
+            return table.unpack(Result, 1, Result.n)
+
+        end
+
+    end
+
+    -- ตำแหน่งคลิกเทียบกับ Frame (ไม่ได้ = กลาง Frame)
+    local function LocalClick(Frame)
+
+        local Ok, Pos = pcall(function()
+            return UserInputService:GetMouseLocation()
+        end)
+
+        if Ok and Pos then
+
+            local X = Pos.X - Frame.AbsolutePosition.X
+            local Y = Pos.Y - Frame.AbsolutePosition.Y
+
+            if X >= 0 and Y >= 0
+                and X <= Frame.AbsoluteSize.X
+                and Y <= Frame.AbsoluteSize.Y
+            then
+                return X, Y
+            end
+
+        end
+
+        return Frame.AbsoluteSize.X / 2, Frame.AbsoluteSize.Y / 2
+
+    end
+
+    -- วงน้ำกระเพื่อมตอนกด
+    local function Ripple(Frame)
+
+        local X, Y = LocalClick(Frame)
+
+        local Size = math.max(Frame.AbsoluteSize.X, 80) * 1.4
+
+        local Dot = Create("Frame", {
+            Name = "Ripple",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromOffset(X, Y),
+            Size = UDim2.fromOffset(0, 0),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BackgroundTransparency = 0.72,
+            BorderSizePixel = 0,
+            ZIndex = 1,
+        })
+        Dot.Parent = Frame
+        AddCorner(Dot, 500)
+
+        PlayTween(Dot, 0.5, {
+            Size = UDim2.fromOffset(Size, Size),
+            BackgroundTransparency = 1,
+        }, Enum.EasingStyle.Quad)
+
+        task.delay(0.55, function()
+            if Dot.Parent then
+                Dot:Destroy()
+            end
+        end)
+
+    end
+
+    -- ปุ่ม: กระเพื่อม + ขอบวาบ + ลูกศรกระดก
+    Decorate("CreateButton", function(Frame)
+
+        local Action = Frame:FindFirstChild("ActionButton")
+
+        if not Action then
+            return
+        end
+
+        local Stroke = Frame:FindFirstChildOfClass("UIStroke")
+        local Badge = Action:FindFirstChild("ClickIndicator")
+
+        Action.Activated:Connect(function()
+
+            Ripple(Frame)
+
+            if Stroke then
+                Stroke.Transparency = 0.15
+                PlayTween(Stroke, 0.4, { Transparency = 0.88 })
+            end
+
+            if Badge then
+                Badge.Position = UDim2.new(1, -5, 0.5, 0)
+                PlayTween(Badge, 0.35, {
+                    Position = UDim2.new(1, -12, 0.5, 0),
+                }, Enum.EasingStyle.Back)
+            end
+
+        end)
+
+    end)
+
+    -- สวิตช์: เด้งขยาย + เรืองแสงตอนเปิด + กระเพื่อม
+    Decorate("CreateToggle", function(Frame, Handle)
+
+        local Switch = Frame:FindFirstChild("Switch")
+
+        if not Switch then
+            return
+        end
+
+        local Glow = Instance.new("UIStroke")
+        Glow.Color = KRYVEX.Theme.Primary
+        Glow.Thickness = 3
+        Glow.Transparency = 1
+        Glow.Parent = Switch
+
+        Switch.Activated:Connect(function()
+
+            Ripple(Frame)
+
+            PlayTween(Switch, 0.08, {
+                Size = UDim2.fromOffset(52, 28),
+            })
+
+            task.delay(0.08, function()
+                if Switch.Parent then
+                    PlayTween(Switch, 0.25, {
+                        Size = UDim2.fromOffset(44, 24),
+                    }, Enum.EasingStyle.Back)
+                end
+            end)
+
+            local On = false
+
+            if type(Handle) == "table" and Handle.Get then
+                On = Handle.Get()
+            end
+
+            if On then
+                Glow.Transparency = 0.2
+                PlayTween(Glow, 0.6, { Transparency = 1 })
+            end
+
+        end)
+
+    end)
+
+    -- สไลเดอร์: จุดขาวใหญ่ให้เห็นว่าลากได้
+    Decorate("CreateSlider", function(Frame)
+
+        local Bar
+
+        for _, Child in ipairs(Frame:GetChildren()) do
+            if Child:IsA("Frame") and Child:FindFirstChildOfClass("TextButton") then
+                Bar = Child
+                break
+            end
+        end
+
+        if not Bar then
+            return
+        end
+
+        local Fill = Bar:FindFirstChildOfClass("Frame")
+        local Hitbox = Bar:FindFirstChildOfClass("TextButton")
+
+        if not Fill or not Hitbox then
+            return
+        end
+
+        -- แสงเรืองรอบจุด
+        local Halo = Create("Frame", {
+            Name = "KnobHalo",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Size = UDim2.fromOffset(28, 28),
+            BackgroundColor3 = KRYVEX.Theme.Primary,
+            BackgroundTransparency = 0.82,
+            BorderSizePixel = 0,
+            ZIndex = 3,
+        })
+        Halo.Parent = Bar
+        AddCorner(Halo, 20)
+
+        -- จุดขาว
+        local Knob = Create("Frame", {
+            Name = "Knob",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Size = UDim2.fromOffset(18, 18),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BackgroundTransparency = 0,
+            BorderSizePixel = 0,
+            ZIndex = 4,
+        })
+        Knob.Parent = Bar
+        AddCorner(Knob, 20)
+        AddStroke(Knob, Color3.new(0, 0, 0), 0.55, 2)
+
+        local function Sync()
+
+            local Position = UDim2.new(Fill.Size.X.Scale, 0, 0.5, 0)
+
+            Knob.Position = Position
+            Halo.Position = Position
+
+        end
+
+        Fill:GetPropertyChangedSignal("Size"):Connect(Sync)
+        Sync()
+
+        -- ขยายพื้นที่จับให้ครอบจุดด้วย และอยู่เหนือจุดเพื่อรับการลาก
+        Hitbox.ZIndex = 8
+        Hitbox.Size = UDim2.new(1, 24, 0, 34)
+        Hitbox.Position = UDim2.new(0, -12, 0.5, -17)
+
+        local Grabbed = false
+
+        local function Grow(Big)
+
+            PlayTween(Knob, 0.15, {
+                Size = Big and UDim2.fromOffset(24, 24) or UDim2.fromOffset(18, 18),
+            }, Enum.EasingStyle.Back)
+
+            PlayTween(Halo, 0.15, {
+                Size = Big and UDim2.fromOffset(40, 40) or UDim2.fromOffset(28, 28),
+                BackgroundTransparency = Big and 0.65 or 0.82,
+            })
+
+        end
+
+        Hitbox.MouseEnter:Connect(function()
+            if not Grabbed then
+                PlayTween(Knob, 0.12, { Size = UDim2.fromOffset(21, 21) })
+            end
+        end)
+
+        Hitbox.MouseLeave:Connect(function()
+            if not Grabbed then
+                Grow(false)
+            end
+        end)
+
+        Hitbox.InputBegan:Connect(function(Input)
+
+            if Input.UserInputType == Enum.UserInputType.MouseButton1
+                or Input.UserInputType == Enum.UserInputType.Touch
+            then
+                Grabbed = true
+                Grow(true)
+            end
+
+        end)
+
+        UserInputService.InputEnded:Connect(function(Input)
+
+            if Grabbed
+                and (
+                    Input.UserInputType == Enum.UserInputType.MouseButton1
+                    or Input.UserInputType == Enum.UserInputType.Touch
+                )
+            then
+                Grabbed = false
+                Grow(false)
+            end
+
+        end)
+
+    end)
+
+    -- สลับหมวด: หน้าเลื่อนขึ้นนุ่มๆ + ม่านจางเข้า
+    local BaseSelect = Tab.Select
+
+    if type(BaseSelect) == "function" then
+
+        Tab.Select = function(self, ...)
+
+            local Already = Page.Visible
+
+            BaseSelect(self, ...)
+
+            if Already then
+                return
+            end
+
+            Page.Position = UDim2.new(0, 0, 0, 18)
+
+            PlayTween(Page, 0.35, {
+                Position = UDim2.new(0, 0, 0, 0),
+            }, Enum.EasingStyle.Quint)
+
+            local Content = Page.Parent
+
+            if Content then
+
+                local Veil = Content:FindFirstChild("TabVeil")
+
+                if not Veil then
+
+                    Veil = Create("Frame", {
+                        Name = "TabVeil",
+                        Size = UDim2.fromScale(1, 1),
+                        BackgroundColor3 = KRYVEX.Theme.Background,
+                        BackgroundTransparency = 1,
+                        BorderSizePixel = 0,
+                        ZIndex = 50,
+                    })
+                    Veil.Parent = Content
+
+                end
+
+                Veil.BackgroundTransparency = 0.45
+                PlayTween(Veil, 0.32, { BackgroundTransparency = 1 })
+
+            end
+
+        end
+
+    end
+
+    ----------------------------------------------------
     -- เก็บของเดิม แล้วห่อให้ทุกอย่างมี LayoutOrder ตามลำดับ
     ----------------------------------------------------
 
@@ -11413,17 +11750,51 @@ function KRYVEX:CreateWindow(config)
 
     local Window = OriginalCreateWindow(self, config)
 
-    -- แก้บั๊กเดิม: ปิด UI แล้วปุ่มลอยไม่หาย
+    -- ปิด UI: เด้งขยายนิดนึงแล้วย่อหายไป + ปุ่มลอยหดหายตาม (และแก้บั๊กปุ่มลอยไม่หาย)
     local OriginalDestroy = Window.Destroy
+    local Closing = false
 
     function Window:Destroy()
 
-        OriginalDestroy(self)
+        if Closing or Window.Destroyed then
+            return
+        end
 
-        task.delay(0.4, function()
-            if Window.FloatGui then
-                Window.FloatGui:Destroy()
+        Closing = true
+
+        local HideScale = Window.HideScale
+        local FloatButton = Window.FloatButton
+
+        if HideScale then
+            PlayTween(HideScale, 0.09, { Scale = 1.04 })
+        end
+
+        task.delay(0.09, function()
+
+            if HideScale then
+                PlayTween(HideScale, 0.3, { Scale = 0.75 },
+                    Enum.EasingStyle.Back, Enum.EasingDirection.In)
             end
+
+            if FloatButton then
+
+                local FloatScale = FloatButton:FindFirstChildOfClass("UIScale")
+
+                if FloatScale then
+                    PlayTween(FloatScale, 0.25, { Scale = 0 },
+                        Enum.EasingStyle.Back, Enum.EasingDirection.In)
+                end
+
+            end
+
+            OriginalDestroy(Window)
+
+            task.delay(0.4, function()
+                if Window.FloatGui then
+                    Window.FloatGui:Destroy()
+                end
+            end)
+
         end)
 
     end
@@ -12146,7 +12517,6 @@ function KRYVEX.BuildSeasonFX(Window, Main, Header, Title)
     return OriginalSeasonFX(Window, Main, Header, Title)
 
 end
-
 
 --=========================================================
 -- RETURN
