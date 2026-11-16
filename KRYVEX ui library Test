@@ -10862,46 +10862,35 @@ function KRYVEX:CreateWindow(
     return Window
 
 end
+
 --[[
 =========================================================
- KRYVEX PATCH : TWO COLUMNS + BIG HEADING
- วางทั้งไฟล์ "เหนือ" บรรทัดสุดท้าย (return KRYVEX)
- (หลัง end ของ CreateWindow, ก่อนแบนเนอร์ -- RETURN --)
- ใช้ร่วมกับแพตช์ธีม Normal ได้ ไม่ทับกัน
+ KRYVEX ALL-IN-ONE PATCH  (วางก้อนเดียวจบ)
 
- วิธีใช้:
+ วางทั้งไฟล์นี้ "เหนือ" แบนเนอร์ท้ายไลบรารี:
 
-   local Tab = Window:CreateTab("เมนูหลัก", "layout-dashboard")
+     --=====================================
+     -- RETURN
+     --=====================================
 
-   -- หัวข้อใหญ่ (เต็มความกว้าง)
-   Tab:CreateHeading({
-       Title = "ระบบเคลื่อนที่",
-       Description = "ปรับสปีด / กระโดด",   -- ไม่ใส่ก็ได้
-       Icon = "move",                        -- ไม่ใส่ก็ได้
-   })
+     return KRYVEX
 
-   -- แบ่งสองฝั่ง
-   local Cols = Tab:CreateColumns({
-       LeftTitle = "ฝั่งซ้าย",     -- ไม่ใส่ = ไม่มีหัวข้อ
-       RightTitle = "ฝั่งขวา",
-       Gap = 8,                     -- ช่องว่างระหว่างฝั่ง
-       Ratio = 0.5,                 -- สัดส่วนฝั่งซ้าย (0.5 = ครึ่งๆ)
-       Scroll = true,               -- true = แต่ละฝั่งเลื่อนลงแยกกัน (ค่าเริ่มต้น)
-                                    -- false = สองฝั่งยืดตามเนื้อหา เลื่อนไปกับหน้า
-       Height = nil,                -- กำหนดความสูงแถวเอง (ไม่ใส่ = เต็มพื้นที่ที่เหลือ)
-   })
+ (คือต่อจาก end ของ function KRYVEX:CreateWindow)
 
-   Cols.Left:CreateToggle({ Name = "ออโต้", Callback = function(v) end })
-   Cols.Right:CreateButton({ Name = "กดเลย", Callback = function() end })
-   Cols.Left:CreateHeading("หัวข้อย่อยในฝั่งซ้าย")
-   Cols.Left:CreateSlider({ Name = "สปีด", Min = 0, Max = 100 })
+ ในไฟล์นี้มี:
+   1) หัวข้อใหญ่  Tab:CreateHeading
+   2) หัวข้อเล็ก  Tab:CreateSection  (มีไอคอน + ขอบดำ)
+   3) สองฝั่ง     Tab:CreateColumns  (เลื่อนแยกกัน)
+   4) แก้บั๊กปิด UI แล้วปุ่มลอยไม่หาย
+   5) ธีม Normal เทาดำอวกาศ + แอนิเมชัน
 
-   -- ฝั่งซ้าย/ขวาใช้คำสั่งเดิมได้ทุกอย่าง:
-   -- Button Toggle Slider Input Dropdown MultiDropdown ColorPicker
-   -- Keybind Status FeatureCard InfoCard ProfileCard CommandBox
-   -- Card Label Section Heading
+ ถ้าเคยวางแพตช์เก่าไว้ ให้ลบของเก่าออกก่อน
 =========================================================
 ]]
+
+--=========================================================
+-- PART A : LAYOUT (Heading / Section / Columns)
+--=========================================================
 
 local OriginalCreateWindow = KRYVEX.CreateWindow
 
@@ -11098,6 +11087,107 @@ function KRYVEX.AttachLayout(Tab)
             end,
 
         }
+
+    end
+
+    ----------------------------------------------------
+    -- SMALL HEADING (SECTION) : icon + outlined text
+    ----------------------------------------------------
+
+    function Tab:CreateSection(config)
+
+        if type(config) ~= "table" then
+            config = { Title = config }
+        end
+
+        local Theme = KRYVEX.Theme
+
+        local TitleText = tostring(config.Title or config.Name or config.Text or "Section")
+        local IconValue = config.Icon
+        local HasIcon = IconValue ~= nil and IconValue ~= ""
+        local Height = config.Height or 30
+        local TextX = HasIcon and 30 or 4
+
+        local Frame = Create("Frame", {
+            Name = "Section",
+            Size = UDim2.new(1, 0, 0, Height),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+        })
+        Frame.Parent = Page
+
+        if HasIcon then
+
+            local Icon, Kind = KRYVEX.CreateIcon(IconValue, {
+                Name = "SectionIcon",
+                AnchorPoint = Vector2.new(0, 0.5),
+                Position = UDim2.new(0, 4, 0.5, 0),
+                Size = UDim2.fromOffset(20, 20),
+                Color = config.IconColor or config.Color or Theme.Primary,
+                TextSize = 17,
+                ZIndex = 2,
+            })
+
+            if Icon then
+
+                Icon.Parent = Frame
+
+                -- ไอคอนแบบสัญลักษณ์ใส่ขอบดำได้ / ไอคอนรูปภาพใส่เงาดำรองหลัง
+                if Kind == "glyph" then
+
+                    local IconStroke = Instance.new("UIStroke")
+                    IconStroke.Color = config.StrokeColor or Color3.new(0, 0, 0)
+                    IconStroke.Thickness = config.StrokeThickness or 2
+                    IconStroke.Parent = Icon
+
+                else
+
+                    local Shadow = KRYVEX.CreateIcon(IconValue, {
+                        Name = "SectionIconShadow",
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Position = UDim2.new(0, 5, 0.5, 1),
+                        Size = UDim2.fromOffset(20, 20),
+                        Color = config.StrokeColor or Color3.new(0, 0, 0),
+                        Transparency = 0.25,
+                        ZIndex = 1,
+                    })
+
+                    if Shadow then
+                        Shadow.Parent = Frame
+                    end
+
+                end
+
+            end
+
+        end
+
+        local TitleLabel = Create("TextLabel", {
+            Name = "SectionTitle",
+            Position = UDim2.new(0, TextX, 0, 0),
+            Size = UDim2.new(1, -TextX, 1, 0),
+            BackgroundTransparency = 1,
+            Text = TitleText,
+            TextColor3 = config.Color or Theme.Primary,
+            TextSize = config.TextSize or 15,
+            Font = Enum.Font.GothamBlack,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            ZIndex = 2,
+        })
+        TitleLabel.Parent = Frame
+
+        -- ขอบตัวอักษรสีดำ ให้เห็นชัดบนทุกพื้น
+        local TitleStroke = Instance.new("UIStroke")
+        TitleStroke.Color = config.StrokeColor or Color3.new(0, 0, 0)
+        TitleStroke.Thickness = config.StrokeThickness or 2
+        TitleStroke.Transparency = 0
+        TitleStroke.LineJoinMode = Enum.LineJoinMode.Round
+        TitleStroke.Parent = TitleLabel
+
+        -- คืนเป็น TextLabel เหมือนเดิม: S.Text = "ชื่อใหม่" ใช้ได้
+        return TitleLabel
 
     end
 
@@ -11323,6 +11413,21 @@ function KRYVEX:CreateWindow(config)
 
     local Window = OriginalCreateWindow(self, config)
 
+    -- แก้บั๊กเดิม: ปิด UI แล้วปุ่มลอยไม่หาย
+    local OriginalDestroy = Window.Destroy
+
+    function Window:Destroy()
+
+        OriginalDestroy(self)
+
+        task.delay(0.4, function()
+            if Window.FloatGui then
+                Window.FloatGui:Destroy()
+            end
+        end)
+
+    end
+
     local OriginalCreateTab = Window.CreateTab
 
     function Window:CreateTab(name, icon)
@@ -11336,6 +11441,712 @@ function KRYVEX:CreateWindow(config)
     return Window
 
 end
+
+--=========================================================
+-- PART B : NORMAL THEME (SPACE)
+--=========================================================
+
+--=========================================================
+-- PALETTE : เทา-ดำ อวกาศ
+--=========================================================
+
+KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, {
+    ThemeId = "normal",
+    Animation = "clean",
+    IsHalloween = false,
+
+    Background = Color3.fromRGB(12, 12, 15),
+    Sidebar = Color3.fromRGB(8, 8, 11),
+    Card = Color3.fromRGB(24, 25, 30),
+    CardHover = Color3.fromRGB(38, 40, 48),
+
+    Primary = Color3.fromRGB(205, 210, 220),
+    PrimaryDark = Color3.fromRGB(88, 92, 104),
+    Text = Color3.fromRGB(245, 247, 250),
+    SubText = Color3.fromRGB(140, 146, 158),
+    ToggleOff = Color3.fromRGB(52, 54, 62),
+
+    Danger = Color3.fromRGB(220, 70, 80),
+    Success = Color3.fromRGB(90, 225, 150),
+    Warning = Color3.fromRGB(255, 200, 80),
+
+    Stroke1 = Color3.fromRGB(70, 74, 86),
+    Stroke2 = Color3.fromRGB(235, 238, 245),
+    Stroke3 = Color3.fromRGB(130, 136, 150),
+
+    Sheen1 = Color3.fromRGB(255, 255, 255),
+    Sheen2 = Color3.fromRGB(170, 175, 188),
+    Sheen3 = Color3.fromRGB(225, 228, 235),
+
+    FloatBg = Color3.fromRGB(8, 8, 11),
+    FloatEdge1 = Color3.fromRGB(110, 115, 128),
+    FloatEdge2 = Color3.fromRGB(245, 247, 250),
+
+    FxDark = Color3.fromRGB(50, 54, 66),
+    FxMid = Color3.fromRGB(120, 126, 140),
+    FxSilver = Color3.fromRGB(185, 190, 202),
+    FxLight = Color3.fromRGB(225, 228, 236),
+    FxWhite = Color3.fromRGB(255, 255, 255),
+
+    -- สีเนบิวลาจางๆ (ม่วงเทา / ฟ้าเทา)
+    NebulaA = Color3.fromRGB(95, 85, 140),
+    NebulaB = Color3.fromRGB(70, 100, 140),
+})
+
+--=========================================================
+-- SPACE FX
+--=========================================================
+
+KRYVEX.NormalFX = {
+    Intro = true,        -- ฉากเปิด: วาร์ปผ่านอวกาศ -> ดาวเคราะห์ + วงแหวน
+    Nebula = true,       -- เนบิวลาลอยหลังเนื้อหา
+    Stars = true,        -- ดาวระยิบระยับเลื่อนช้าๆ
+    ShootingStar = true, -- ดาวตก
+    LogoOrbit = true,    -- ดวงจันทร์โคจรรอบโลโก้
+    HeaderLine = true,   -- เส้นไล่แสงใต้หัว
+    TitleShine = true,   -- ชื่อไล่ประกาย
+    BorderPulse = true,  -- ขอบหายใจ
+}
+
+local OriginalSeasonFX = KRYVEX.BuildSeasonFX
+
+function KRYVEX.BuildNormalFX(Window, Main, Header, Title)
+
+    local Theme = KRYVEX.Theme
+    local FX = KRYVEX.NormalFX
+
+    local function Alive()
+        return not Window.Destroyed and Main.Parent ~= nil
+    end
+
+    ----------------------------------------------------
+    -- INTRO : WARP -> PLANET
+    ----------------------------------------------------
+
+    if FX.Intro and not KRYVEX.NormalIntroPlayed then
+
+        KRYVEX.NormalIntroPlayed = true
+
+        task.spawn(function()
+
+            pcall(function()
+
+                local Root = Create("Frame", {
+                    Name = "NormalIntro",
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundColor3 = Color3.fromRGB(3, 3, 5),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ZIndex = 200,
+                })
+                Root.Parent = Main.Parent
+
+                task.delay(8, function()
+                    if Root.Parent then Root:Destroy() end
+                end)
+
+                PlayTween(Root, 0.3, { BackgroundTransparency = 0.04 })
+
+                local Group = Create("CanvasGroup", {
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    GroupTransparency = 0,
+                    ZIndex = 201,
+                })
+                Group.Parent = Root
+
+                local function ScreenSize()
+                    local s = Root.AbsoluteSize
+                    if s.X < 10 or s.Y < 10 then
+                        local cam = workspace.CurrentCamera
+                        return cam and cam.ViewportSize or Vector2.new(800, 450)
+                    end
+                    return s
+                end
+
+                local CenterY = 0.42
+
+                -- ดาววาร์ป
+                local Stars = {}
+
+                for _ = 1, 46 do
+
+                    local Frame = Create("Frame", {
+                        AnchorPoint = Vector2.new(0.5, 0.5),
+                        Size = UDim2.fromOffset(2, 2),
+                        BackgroundColor3 = Theme.FxWhite,
+                        BackgroundTransparency = 1,
+                        BorderSizePixel = 0,
+                        ZIndex = 202,
+                    })
+                    Frame.Parent = Group
+
+                    table.insert(Stars, {
+                        Frame = Frame,
+                        Angle = math.random() * math.pi * 2,
+                        Dist = math.random(),
+                        Speed = 0.35 + math.random() * 0.6,
+                    })
+
+                end
+
+                -- ดาวเคราะห์
+                local Planet = Create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, CenterY, 0),
+                    Size = UDim2.fromOffset(0, 0),
+                    BackgroundColor3 = Color3.new(1, 1, 1),
+                    BackgroundTransparency = 0,
+                    BorderSizePixel = 0,
+                    ZIndex = 203,
+                })
+                Planet.Parent = Group
+                AddCorner(Planet, 200)
+
+                local PlanetGrad = Instance.new("UIGradient")
+                PlanetGrad.Rotation = 40
+                PlanetGrad.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Theme.FxLight),
+                    ColorSequenceKeypoint.new(0.55, Theme.FxMid),
+                    ColorSequenceKeypoint.new(1, Color3.fromRGB(14, 14, 18)),
+                })
+                PlanetGrad.Parent = Planet
+
+                AddStroke(Planet, Theme.FxSilver, 0.65, 3)
+
+                -- วงแหวน
+                local Ring = Create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, CenterY, 0),
+                    Size = UDim2.fromOffset(0, 0),
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    Rotation = -18,
+                    ZIndex = 204,
+                })
+                Ring.Parent = Group
+                AddCorner(Ring, 200)
+
+                local RingStroke = AddStroke(Ring, Color3.new(1, 1, 1), 0.2, 2)
+
+                local RingGrad = Instance.new("UIGradient")
+                RingGrad.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Theme.FxDark),
+                    ColorSequenceKeypoint.new(0.5, Theme.FxWhite),
+                    ColorSequenceKeypoint.new(1, Theme.FxDark),
+                })
+                RingGrad.Parent = RingStroke
+
+                -- ดวงจันทร์โคจร
+                local Moon = Create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Size = UDim2.fromOffset(9, 9),
+                    BackgroundColor3 = Theme.FxWhite,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ZIndex = 205,
+                })
+                Moon.Parent = Group
+                AddCorner(Moon, 9)
+                AddStroke(Moon, Theme.FxLight, 0.5, 3)
+
+                -- ข้อความ
+                local TitleLabel = Create("TextLabel", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, CenterY, 110),
+                    Size = UDim2.new(1, 0, 0, 34),
+                    BackgroundTransparency = 1,
+                    Text = "",
+                    TextColor3 = Theme.Text,
+                    TextSize = 28,
+                    Font = Enum.Font.GothamBlack,
+                    ZIndex = 206,
+                })
+                TitleLabel.Parent = Group
+
+                local TitleStroke = Instance.new("UIStroke")
+                TitleStroke.Color = Theme.FxSilver
+                TitleStroke.Thickness = 1.5
+                TitleStroke.Transparency = 0.6
+                TitleStroke.Parent = TitleLabel
+
+                local Status = Create("TextLabel", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, CenterY, 140),
+                    Size = UDim2.new(1, 0, 0, 16),
+                    BackgroundTransparency = 1,
+                    Text = "ENTERING ORBIT",
+                    TextColor3 = Theme.FxMid,
+                    TextSize = 11,
+                    Font = Enum.Font.Code,
+                    ZIndex = 206,
+                })
+                Status.Parent = Group
+
+                local BarBg = Create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.5, 0, CenterY, 162),
+                    Size = UDim2.fromOffset(220, 3),
+                    BackgroundColor3 = Theme.ToggleOff,
+                    BackgroundTransparency = 0.3,
+                    BorderSizePixel = 0,
+                    ZIndex = 206,
+                })
+                BarBg.Parent = Group
+                AddCorner(BarBg, 3)
+
+                local BarFill = Create("Frame", {
+                    Size = UDim2.fromScale(0, 1),
+                    BackgroundColor3 = Color3.new(1, 1, 1),
+                    BackgroundTransparency = 0,
+                    BorderSizePixel = 0,
+                    ZIndex = 207,
+                })
+                BarFill.Parent = BarBg
+                AddCorner(BarFill, 3)
+
+                local FillGrad = Instance.new("UIGradient")
+                FillGrad.Color = ColorSequence.new({
+                    ColorSequenceKeypoint.new(0, Theme.FxDark),
+                    ColorSequenceKeypoint.new(1, Theme.FxWhite),
+                })
+                FillGrad.Parent = BarFill
+
+                -- แฟลชตอนกระโดดออก
+                local Flash = Create("Frame", {
+                    Size = UDim2.fromScale(1, 1),
+                    BackgroundColor3 = Theme.FxWhite,
+                    BackgroundTransparency = 1,
+                    BorderSizePixel = 0,
+                    ZIndex = 210,
+                })
+                Flash.Parent = Root
+
+                -- ลูปแอนิเมชัน
+                local T = 0
+                local Exiting = false
+                local OrbitOn = false
+                local Conn
+
+                Conn = RunService.Heartbeat:Connect(function(dt)
+
+                    if not Root.Parent then
+                        Conn:Disconnect()
+                        return
+                    end
+
+                    T = T + dt
+
+                    -- ความเร็ววาร์ป: เร็วจัดตอนต้น -> ช้าลง -> พุ่งอีกรอบตอนออก
+                    local Warp = math.clamp(1 - T / 1.8, 0, 1)
+
+                    if Exiting then
+                        Warp = math.clamp((T - Exiting) / 0.45, 0, 1)
+                    end
+
+                    local Size = ScreenSize()
+                    local MaxR = math.max(Size.X, Size.Y) * 0.62
+
+                    for _, S in ipairs(Stars) do
+
+                        S.Dist = S.Dist + dt * S.Speed * (0.06 + 2.4 * Warp)
+
+                        if S.Dist > 1 then
+                            S.Dist = 0.02 + math.random() * 0.1
+                            S.Angle = math.random() * math.pi * 2
+                        end
+
+                        local R = S.Dist * S.Dist * MaxR
+
+                        S.Frame.Position = UDim2.new(
+                            0.5, math.cos(S.Angle) * R,
+                            CenterY, math.sin(S.Angle) * R
+                        )
+
+                        S.Frame.Rotation = math.deg(S.Angle)
+
+                        S.Frame.Size = UDim2.fromOffset(
+                            2 + 60 * Warp * S.Dist,
+                            2
+                        )
+
+                        S.Frame.BackgroundTransparency =
+                            math.clamp(0.95 - S.Dist * 1.1, 0.05, 1)
+
+                    end
+
+                    RingGrad.Rotation = (T * 70) % 360
+
+                    if OrbitOn then
+                        local A = T * 2.6
+                        local X = math.cos(A) * 112
+                        local Y = math.sin(A) * 27
+                        local Tilt = math.rad(-18)
+                        Moon.Position = UDim2.new(
+                            0.5, X * math.cos(Tilt) - Y * math.sin(Tilt),
+                            CenterY, X * math.sin(Tilt) + Y * math.cos(Tilt)
+                        )
+                    end
+
+                end)
+
+                -- ไทม์ไลน์
+                task.wait(1.1)
+
+                PlayTween(Planet, 0.8, { Size = UDim2.fromOffset(92, 92) },
+                    Enum.EasingStyle.Back)
+                PlayTween(Ring, 0.9, { Size = UDim2.fromOffset(210, 54) },
+                    Enum.EasingStyle.Back)
+
+                task.wait(0.5)
+
+                OrbitOn = true
+                PlayTween(Moon, 0.3, { BackgroundTransparency = 0 })
+
+                PlayTween(BarFill, 1.3, { Size = UDim2.fromScale(1, 1) },
+                    Enum.EasingStyle.Quart, Enum.EasingDirection.InOut)
+
+                task.spawn(function()
+                    task.wait(0.5)
+                    if Status.Parent then Status.Text = "SCANNING SECTOR" end
+                    task.wait(0.55)
+                    if Status.Parent then
+                        Status.Text = "SYSTEM ONLINE"
+                        Status.TextColor3 = Theme.Success
+                    end
+                end)
+
+                local Text = tostring(Window.Title or "KRYVEX")
+                local Count = utf8.len(Text) or #Text
+
+                for Index = 1, Count do
+                    if not Root.Parent then return end
+                    local Cut = utf8.offset(Text, Index + 1)
+                    TitleLabel.Text = Cut and string.sub(Text, 1, Cut - 1) or Text
+                    task.wait(0.05)
+                end
+
+                task.wait(0.8)
+
+                -- วาร์ปออก
+                Exiting = T
+                Status.Text = "JUMPING"
+
+                PlayTween(Planet, 0.5, { Size = UDim2.fromOffset(0, 0) },
+                    Enum.EasingStyle.Back, Enum.EasingDirection.In)
+                PlayTween(Ring, 0.5, { Size = UDim2.fromOffset(0, 0) },
+                    Enum.EasingStyle.Back, Enum.EasingDirection.In)
+                PlayTween(Moon, 0.3, { BackgroundTransparency = 1 })
+
+                task.wait(0.4)
+
+                PlayTween(Flash, 0.18, { BackgroundTransparency = 0.25 })
+
+                task.wait(0.2)
+
+                PlayTween(Group, 0.4, { GroupTransparency = 1 })
+                PlayTween(Root, 0.5, { BackgroundTransparency = 1 })
+                PlayTween(Flash, 0.5, { BackgroundTransparency = 1 })
+
+                task.wait(0.55)
+
+                if Root.Parent then Root:Destroy() end
+
+            end)
+
+        end)
+
+    end
+
+    ----------------------------------------------------
+    -- NEBULA (หลังเนื้อหา)
+    ----------------------------------------------------
+
+    local Nebulae = {}
+
+    if FX.Nebula then
+
+        local Specs = {
+            { Theme.NebulaA or Theme.FxMid, 300, 0.2, 0.25, 0.1 },
+            { Theme.NebulaB or Theme.FxMid, 340, 0.75, 0.7, 0.08 },
+            { Theme.FxMid, 240, 0.55, 0.15, 0.06 },
+        }
+
+        for _, Spec in ipairs(Specs) do
+
+            local Blob = Create("Frame", {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Size = UDim2.fromOffset(Spec[2], Spec[2]),
+                BackgroundColor3 = Spec[1],
+                BackgroundTransparency = 0.93,
+                BorderSizePixel = 0,
+                ZIndex = 0,
+            })
+            Blob.Parent = Main
+            AddCorner(Blob, Spec[2])
+
+            table.insert(Nebulae, {
+                Frame = Blob,
+                X = Spec[3],
+                Y = Spec[4],
+                Speed = Spec[5],
+                Phase = math.random() * 6,
+            })
+
+        end
+
+    end
+
+    ----------------------------------------------------
+    -- FX LAYER
+    ----------------------------------------------------
+
+    local Layer = Create("Frame", {
+        Name = "NormalFX",
+        Size = UDim2.fromScale(1, 1),
+        BackgroundTransparency = 1,
+        ClipsDescendants = true,
+        ZIndex = 25,
+    })
+    Layer.Parent = Main
+
+    local StarList = {}
+
+    if FX.Stars then
+
+        local Colors = { Theme.FxWhite, Theme.FxLight, Theme.FxSilver, Theme.FxWhite }
+
+        for _ = 1, 34 do
+
+            local Dot = math.random() < 0.2 and 3 or 2
+
+            local Frame = Create("Frame", {
+                Size = UDim2.fromOffset(Dot, Dot),
+                BackgroundColor3 = Colors[math.random(#Colors)],
+                BackgroundTransparency = 0.9,
+                BorderSizePixel = 0,
+                ZIndex = 1,
+            })
+            Frame.Parent = Layer
+            AddCorner(Frame, 3)
+
+            table.insert(StarList, {
+                Frame = Frame,
+                X = math.random(),
+                Y = math.random(),
+                Speed = 0.003 + math.random() * 0.008,
+                Rate = 0.8 + math.random() * 2,
+                Phase = math.random() * 6.28,
+            })
+
+        end
+
+    end
+
+    -- ดวงจันทร์โคจรรอบโลโก้
+    local Orbiters = {}
+
+    if FX.LogoOrbit then
+
+        for _, Spec in ipairs({
+            { 24, 1.5, 4 },
+            { 29, -1.0, 3 },
+        }) do
+
+            local Dot = Create("Frame", {
+                AnchorPoint = Vector2.new(0.5, 0.5),
+                Size = UDim2.fromOffset(Spec[3], Spec[3]),
+                BackgroundColor3 = Theme.FxWhite,
+                BackgroundTransparency = 0.1,
+                BorderSizePixel = 0,
+                ZIndex = 6,
+            })
+            Dot.Parent = Header
+            AddCorner(Dot, 6)
+            AddStroke(Dot, Theme.FxLight, 0.6, 3)
+
+            table.insert(Orbiters, {
+                Frame = Dot,
+                Radius = Spec[1],
+                Speed = Spec[2],
+                Phase = math.random() * 6,
+            })
+
+        end
+
+    end
+
+    -- เส้นใต้หัว
+    local HeaderGrad
+
+    if FX.HeaderLine then
+
+        local Line = Create("Frame", {
+            Name = "HeaderLine",
+            AnchorPoint = Vector2.new(0, 1),
+            Position = UDim2.new(0, 0, 1, 0),
+            Size = UDim2.new(1, 0, 0, 2),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BorderSizePixel = 0,
+            ZIndex = 4,
+        })
+        Line.Parent = Header
+
+        HeaderGrad = Instance.new("UIGradient")
+        HeaderGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Theme.Stroke1),
+            ColorSequenceKeypoint.new(0.5, Theme.FxWhite),
+            ColorSequenceKeypoint.new(1, Theme.Stroke1),
+        })
+        HeaderGrad.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 0.92),
+            NumberSequenceKeypoint.new(0.5, 0),
+            NumberSequenceKeypoint.new(1, 0.92),
+        })
+        HeaderGrad.Parent = Line
+
+    end
+
+    local TitleGrad
+
+    if FX.TitleShine and Title then
+
+        TitleGrad = Instance.new("UIGradient")
+        TitleGrad.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Theme.FxSilver),
+            ColorSequenceKeypoint.new(0.5, Theme.FxWhite),
+            ColorSequenceKeypoint.new(1, Theme.FxSilver),
+        })
+        TitleGrad.Parent = Title
+
+    end
+
+    local MainStroke = FX.BorderPulse and Main:FindFirstChildOfClass("UIStroke") or nil
+
+    -- ดาวตก
+    if FX.ShootingStar then
+
+        task.spawn(function()
+
+            task.wait(2 + math.random() * 2)
+
+            while Alive() do
+
+                local Streak = Create("Frame", {
+                    AnchorPoint = Vector2.new(0.5, 0.5),
+                    Position = UDim2.new(0.1 + math.random() * 0.6, 0, 0.02 + math.random() * 0.25, 0),
+                    Size = UDim2.fromOffset(90, 2),
+                    Rotation = 28,
+                    BackgroundColor3 = Theme.FxWhite,
+                    BackgroundTransparency = 0,
+                    BorderSizePixel = 0,
+                    ZIndex = 3,
+                })
+                Streak.Parent = Layer
+
+                local Grad = Instance.new("UIGradient")
+                Grad.Transparency = NumberSequence.new({
+                    NumberSequenceKeypoint.new(0, 1),
+                    NumberSequenceKeypoint.new(1, 0),
+                })
+                Grad.Parent = Streak
+
+                local P = Streak.Position
+
+                PlayTween(Streak, 0.9, {
+                    Position = UDim2.new(P.X.Scale + 0.4, 0, P.Y.Scale + 0.35, 0),
+                    BackgroundTransparency = 1,
+                }, Enum.EasingStyle.Quad, Enum.EasingDirection.In)
+
+                task.delay(0.95, function()
+                    Streak:Destroy()
+                end)
+
+                task.wait(4 + math.random() * 5)
+
+            end
+
+        end)
+
+    end
+
+    ----------------------------------------------------
+    -- LOOP
+    ----------------------------------------------------
+
+    local Clock = 0
+    local Conn
+
+    Conn = RunService.Heartbeat:Connect(function(dt)
+
+        if not Alive() then
+            Conn:Disconnect()
+            return
+        end
+
+        Clock = Clock + dt
+
+        if HeaderGrad then
+            HeaderGrad.Offset = Vector2.new((Clock * 0.35) % 2 - 1, 0)
+        end
+
+        if TitleGrad then
+            TitleGrad.Offset = Vector2.new((Clock * 0.45) % 2 - 1, 0)
+        end
+
+        if MainStroke then
+            MainStroke.Thickness = 1.6 + 0.7 * (0.5 + 0.5 * math.sin(Clock * 1.7))
+        end
+
+        for _, N in ipairs(Nebulae) do
+            N.Frame.Position = UDim2.new(
+                N.X + math.sin(Clock * N.Speed + N.Phase) * 0.18, 0,
+                N.Y + math.cos(Clock * N.Speed * 0.8 + N.Phase) * 0.14, 0
+            )
+        end
+
+        for _, S in ipairs(StarList) do
+
+            local X = (S.X - Clock * S.Speed) % 1
+
+            S.Frame.Position = UDim2.new(X, 0, S.Y, 0)
+
+            S.Frame.BackgroundTransparency =
+                0.35 + 0.6 * (0.5 + 0.5 * math.sin(Clock * S.Rate + S.Phase))
+
+        end
+
+        for _, O in ipairs(Orbiters) do
+            local A = O.Phase + Clock * O.Speed
+            O.Frame.Position = UDim2.fromOffset(
+                30 + math.cos(A) * O.Radius,
+                29 + math.sin(A) * O.Radius * 0.8
+            )
+        end
+
+    end)
+
+end
+
+function KRYVEX.BuildSeasonFX(Window, Main, Header, Title)
+
+    local Theme = KRYVEX.Theme
+
+    if Theme and Theme.ThemeId == "normal" then
+
+        if not KRYVEX.ThemeSettings.Animation then
+            return
+        end
+
+        return KRYVEX.BuildNormalFX(Window, Main, Header, Title)
+
+    end
+
+    return OriginalSeasonFX(Window, Main, Header, Title)
+
+end
+
 
 --=========================================================
 -- RETURN
