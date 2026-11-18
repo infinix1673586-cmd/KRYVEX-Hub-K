@@ -12519,6 +12519,517 @@ function KRYVEX.BuildSeasonFX(Window, Main, Header, Title)
 end
 
 --=========================================================
+-- PART C : SLIDER (พิมพ์เลขได้) + DROPDOWN / MULTI (ลิสต์สด, โหมดผู้เล่น)
+-- วางเหนือ: return KRYVEX
+--=========================================================
+
+local function BuildSlider(Page, config)
+    config = config or {}
+
+    local min = config.Min or 0
+    local max = config.Max or 100
+    local step = config.Increment or 1 -- ทศนิยมใส่ 0.1 / 0.01
+
+    local decimals = 0
+    do
+        local frac = tostring(step):match("%.(%d+)")
+        decimals = frac and #frac or 0
+    end
+
+    local conns = {}
+
+    local function Snap(v)
+        v = math.clamp(v, min, max)
+        if step > 0 then
+            v = math.floor((v - min) / step + 0.5) * step + min
+        end
+        v = tonumber(string.format("%." .. decimals .. "f", v)) or v
+        return math.clamp(v, min, max)
+    end
+
+    local function Fmt(v)
+        return string.format("%." .. decimals .. "f", v)
+    end
+
+    local value = Snap(config.Default or min)
+
+    local Frame = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 65),
+        BackgroundColor3 = KRYVEX.Theme.Card,
+    })
+    Frame.Parent = Page
+    AddCorner(Frame, KRYVEX.Corners.Element)
+
+    local Label = Create("TextLabel", {
+        Size = UDim2.new(1, -100, 0, 24),
+        Position = UDim2.fromOffset(14, 5),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Slider",
+        TextColor3 = KRYVEX.Theme.Text,
+        TextSize = 12,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+    Label.Parent = Frame
+
+    local ValueBox = Create("TextBox", {
+        Name = "ValueBox",
+        AnchorPoint = Vector2.new(1, 0),
+        Size = UDim2.fromOffset(64, 22),
+        Position = UDim2.new(1, -12, 0, 6),
+        BackgroundColor3 = KRYVEX.Theme.Background,
+        Text = Fmt(value),
+        PlaceholderText = "...",
+        PlaceholderColor3 = KRYVEX.Theme.SubText,
+        TextColor3 = KRYVEX.Theme.Primary,
+        TextSize = 12,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ClearTextOnFocus = false,
+    })
+    ValueBox.Parent = Frame
+    AddCorner(ValueBox, KRYVEX.Corners.Inner)
+
+    local BoxStroke = AddStroke(ValueBox, KRYVEX.Theme.Primary, 0.8, 1)
+
+    local Bar = Create("Frame", {
+        Size = UDim2.new(1, -28, 0, 6),
+        Position = UDim2.fromOffset(14, 43),
+        BackgroundColor3 = KRYVEX.Theme.ToggleOff,
+    })
+    Bar.Parent = Frame
+    AddCorner(Bar, 6)
+
+    local Fill = Create("Frame", {
+        Size = UDim2.new((value - min) / (max - min), 0, 1, 0),
+        BackgroundColor3 = KRYVEX.Theme.Primary,
+    })
+    Fill.Parent = Bar
+    AddCorner(Fill, 6)
+
+    local Hitbox = Create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 24),
+        Position = UDim2.new(0, 0, 0.5, -12),
+        BackgroundTransparency = 1,
+        Text = "",
+        AutoButtonColor = false,
+    })
+    Hitbox.Parent = Bar
+
+    local sliding = false
+
+    local function SetValue(newValue, silent)
+        value = Snap(newValue)
+        Fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+
+        if not ValueBox:IsFocused() then
+            ValueBox.Text = Fmt(value)
+        end
+
+        if config.Callback and not silent then
+            task.spawn(config.Callback, value)
+        end
+    end
+
+    ValueBox.Focused:Connect(function()
+        PlayTween(BoxStroke, 0.15, { Transparency = 0.1, Thickness = 1.6 })
+    end)
+
+    ValueBox.FocusLost:Connect(function()
+        PlayTween(BoxStroke, 0.15, { Transparency = 0.8, Thickness = 1 })
+
+        local typed = tonumber((ValueBox.Text:gsub("[%s,]", "")))
+
+        if typed then
+            SetValue(typed) -- เกิน min/max โดน clamp ให้
+        end
+
+        ValueBox.Text = Fmt(value) -- พิมพ์มั่ว = คืนค่าเดิม
+    end)
+
+    Hitbox.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch
+        then
+            sliding = true
+            if ValueBox:IsFocused() then
+                ValueBox:ReleaseFocus()
+            end
+        end
+    end)
+
+    table.insert(conns, UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch
+        then
+            sliding = false
+        end
+    end))
+
+    table.insert(conns, UserInputService.InputChanged:Connect(function(input)
+        if not sliding then
+            return
+        end
+
+        if input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch
+        then
+            local percent = math.clamp(
+                (input.Position.X - Bar.AbsolutePosition.X) / Bar.AbsoluteSize.X,
+                0, 1
+            )
+            SetValue(min + (max - min) * percent)
+        end
+    end))
+
+    Frame.AncestryChanged:Connect(function()
+        if not Frame:IsDescendantOf(game) then
+            for _, c in ipairs(conns) do c:Disconnect() end
+        end
+    end)
+
+    return {
+        Set = function(_, v) SetValue(v) end,
+        Get = function() return value end,
+    }
+end
+
+-- ตัวสร้างร่วม: multi=false -> Dropdown, multi=true -> MultiDropdown
+local function BuildDropdown(Page, config, multi)
+    config = config or {}
+
+    local ITEM_H, ITEM_GAP = 30, 4
+    local MAX_VISIBLE = config.MaxVisible or 5
+    local isPlayers = config.Players == true
+    local includeSelf = config.IncludeSelf == true
+    local placeholder = config.Placeholder or "Select"
+
+    local options, labels, buttons, conns = {}, {}, {}, {}
+    local open = false
+
+    local selected          -- single
+    local sel = {}          -- multi (set)
+
+    if multi then
+        for _, v in ipairs(config.Default or {}) do sel[v] = true end
+    else
+        selected = config.Default
+    end
+
+    local Frame = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 48),
+        BackgroundColor3 = KRYVEX.Theme.Card,
+        ClipsDescendants = true,
+    })
+    Frame.Parent = Page
+    AddCorner(Frame, KRYVEX.Corners.Element)
+
+    local Button = Create("TextButton", {
+        Size = UDim2.new(1, -20, 0, 48),
+        Position = UDim2.fromOffset(10, 0),
+        BackgroundTransparency = 1,
+        Text = "",
+        TextColor3 = KRYVEX.Theme.Text,
+        TextSize = 12,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        AutoButtonColor = false,
+    })
+    Button.Parent = Frame
+
+    local List = Create("ScrollingFrame", {
+        Name = "OptionList",
+        Position = UDim2.fromOffset(10, 52),
+        Size = UDim2.new(1, -20, 0, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 2,
+        ScrollBarImageColor3 = KRYVEX.Theme.Primary,
+        CanvasSize = UDim2.new(),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        Visible = false,
+    })
+    List.Parent = Frame
+
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, ITEM_GAP)
+    ListLayout.Parent = List
+
+    local Empty = Create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, ITEM_H),
+        Position = UDim2.fromOffset(10, 52),
+        BackgroundTransparency = 1,
+        Text = "- ไม่มีรายการ -",
+        TextColor3 = KRYVEX.Theme.SubText,
+        TextSize = 11,
+        Font = Enum.Font.Gotham,
+        Visible = false,
+    })
+    Empty.Parent = Frame
+
+    local function TextOf(value)
+        if value == nil then return placeholder end
+        return labels[value] or tostring(value)
+    end
+
+    local function SelectedList()
+        local out = {}
+        for _, v in ipairs(options) do
+            if sel[v] then table.insert(out, v) end
+        end
+        return out
+    end
+
+    local function RefreshHeader()
+        local arrow = open and "\u{25B2}" or "\u{25BC}"
+        if multi then
+            Button.Text = "Selected: " .. #SelectedList() .. "  " .. arrow
+        else
+            Button.Text = TextOf(selected) .. "  " .. arrow
+        end
+    end
+
+    local function ListHeight()
+        local n = math.min(#options, MAX_VISIBLE)
+        if n == 0 then return ITEM_H end
+        return n * ITEM_H + (n - 1) * ITEM_GAP
+    end
+
+    local function Resize()
+        local h = ListHeight()
+        List.Size = UDim2.new(1, -20, 0, #options == 0 and 0 or h)
+        List.Visible = open and #options > 0
+        Empty.Visible = open and #options == 0
+
+        PlayTween(Frame, 0.2, {
+            Size = UDim2.new(1, 0, 0, open and (48 + 4 + h + 8) or 48),
+        })
+    end
+
+    local function Highlight()
+        for value, btn in pairs(buttons) do
+            local on
+            if multi then on = sel[value] == true else on = (value == selected) end
+            btn.BackgroundColor3 = on and KRYVEX.Theme.PrimaryDark or KRYVEX.Theme.Background
+            btn.TextColor3 = on and KRYVEX.Theme.Text or KRYVEX.Theme.SubText
+            btn.Text = (multi and on and "\u{2713} " or "") .. TextOf(value)
+        end
+    end
+
+    local function Fire()
+        if not config.Callback then return end
+        if multi then
+            task.spawn(config.Callback, SelectedList())
+        else
+            task.spawn(config.Callback, selected)
+        end
+    end
+
+    local function Pick(value)
+        if multi then
+            sel[value] = not sel[value] or nil
+            Highlight()
+            RefreshHeader()
+            Fire()
+        else
+            selected = value
+            open = false
+            Highlight()
+            RefreshHeader()
+            Resize()
+            Fire()
+        end
+    end
+
+    local function MakeOption(value)
+        local Option = Create("TextButton", {
+            Name = "Option",
+            Size = UDim2.new(1, -4, 0, ITEM_H),
+            BackgroundColor3 = KRYVEX.Theme.Background,
+            Text = TextOf(value),
+            TextColor3 = KRYVEX.Theme.SubText,
+            TextSize = 11,
+            Font = Enum.Font.Gotham,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            AutoButtonColor = false,
+        })
+        Option.Parent = List
+        AddCorner(Option, KRYVEX.Corners.Inner)
+        Option.Activated:Connect(function() Pick(value) end)
+        return Option
+    end
+
+    -- diff เฉพาะที่เปลี่ยน ไม่ล้างสร้างใหม่ทั้งลิสต์ = ไม่แลค
+    local function SetOptions(newList)
+        newList = newList or {}
+
+        local keep = {}
+        for _, v in ipairs(newList) do keep[v] = true end
+
+        local gone = {}
+
+        for value, btn in pairs(buttons) do
+            if not keep[value] then
+                btn:Destroy()
+                buttons[value] = nil
+                table.insert(gone, value)
+            end
+        end
+
+        for index, v in ipairs(newList) do
+            local btn = buttons[v]
+            if not btn then
+                btn = MakeOption(v)
+                buttons[v] = btn
+            end
+            btn.LayoutOrder = index
+        end
+
+        options = newList
+
+        local changed = false
+
+        for _, value in ipairs(gone) do
+            if multi then
+                if sel[value] then
+                    sel[value] = nil
+                    changed = true
+                    if config.OnSelectedLeft then task.spawn(config.OnSelectedLeft, value) end
+                end
+            elseif value == selected then
+                selected = nil
+                if config.OnSelectedLeft then task.spawn(config.OnSelectedLeft, value) end
+            end
+        end
+
+        Highlight()
+        RefreshHeader()
+        Resize()
+
+        if multi and changed then Fire() end
+    end
+
+    local function CollectPlayers()
+        local list = {}
+
+        for _, p in ipairs(Players:GetPlayers()) do
+            if includeSelf or p ~= LocalPlayer then
+                table.insert(list, p.Name)
+
+                if config.ShowDisplayName and p.DisplayName ~= p.Name then
+                    labels[p.Name] = p.DisplayName .. " (@" .. p.Name .. ")"
+                else
+                    labels[p.Name] = p.Name
+                end
+            end
+        end
+
+        table.sort(list, function(a, b) return a:lower() < b:lower() end)
+
+        return list
+    end
+
+    if isPlayers then
+        local pending = false
+
+        -- debounce: คนเข้า/ออกรัวๆ ก็คำนวณรอบเดียว
+        local function Queue()
+            if pending then return end
+            pending = true
+
+            task.delay(0.15, function()
+                pending = false
+                if Frame.Parent then SetOptions(CollectPlayers()) end
+            end)
+        end
+
+        table.insert(conns, Players.PlayerAdded:Connect(Queue))
+        table.insert(conns, Players.PlayerRemoving:Connect(Queue))
+
+        SetOptions(CollectPlayers())
+    else
+        SetOptions(config.Options or {})
+
+        if not multi and selected == nil and config.Default == nil and config.AutoSelectFirst ~= false then
+            selected = options[1]
+            Highlight()
+        end
+    end
+
+    RefreshHeader()
+
+    Button.Activated:Connect(function()
+        open = not open
+        RefreshHeader()
+        Resize()
+    end)
+
+    Frame.AncestryChanged:Connect(function()
+        if not Frame:IsDescendantOf(game) then
+            for _, c in ipairs(conns) do c:Disconnect() end
+        end
+    end)
+
+    return {
+        Frame = Frame,
+
+        Set = function(_, v)
+            if multi then
+                sel = {}
+                for _, x in ipairs(v or {}) do sel[x] = true end
+                Highlight(); RefreshHeader(); Fire()
+            else
+                selected = v
+                Highlight(); RefreshHeader(); Fire()
+            end
+        end,
+
+        Get = function()
+            if multi then return SelectedList() end
+            return selected
+        end,
+
+        Refresh = function(_, newList)
+            if isPlayers then
+                SetOptions(CollectPlayers())
+            else
+                SetOptions(newList or options)
+            end
+        end,
+
+        SetOptions = function(_, newList) SetOptions(newList) end,
+        GetOptions = function() return options end,
+    }
+end
+
+-- ดัก AttachLayout: ใส่ของใหม่ "ก่อน" ที่แพตช์เลเยอร์จะห่อ (ฝั่งซ้าย/ขวาเลยได้ด้วย)
+local BaseAttachLayout = KRYVEX.AttachLayout
+
+function KRYVEX.AttachLayout(Tab)
+
+    if Tab and Tab.Page then
+
+        function Tab:CreateSlider(config)
+            return BuildSlider(Tab.Page, config)
+        end
+
+        function Tab:CreateDropdown(config)
+            return BuildDropdown(Tab.Page, config, false)
+        end
+
+        function Tab:CreateMultiDropdown(config)
+            return BuildDropdown(Tab.Page, config, true)
+        end
+
+    end
+
+    return BaseAttachLayout(Tab)
+
+end
+
+--=========================================================
 -- RETURN
 --=========================================================
 
