@@ -13030,6 +13030,64 @@ function KRYVEX.AttachLayout(Tab)
 end
 
 --=========================================================
+-- PART D : ลบรูปพื้นหลัง + พื้นหลังไล่เฉดดำเทา (สไตล์พื้นหลังในรูป)
+--=========================================================
+
+-- ปิดรูปพื้นหลังหลัก
+KRYVEX.Background.Enabled = false
+KRYVEX.Background.Image = ""
+
+-- ไล่เฉด: มุมซ้ายล่างเกือบดำ -> เทาน้ำตาลเข้ม -> มุมขวาบนสว่างขึ้น
+KRYVEX.MainShade = {
+    Enabled = true,
+    Rotation = -45, -- ซ้ายล่าง -> ขวาบน (อยากกลับด้านก็ใส่ 135)
+    Dark  = Color3.fromRGB(8, 9, 16),
+    Mid   = Color3.fromRGB(34, 31, 33),
+    Light = Color3.fromRGB(86, 70, 60),
+}
+
+-- ปรับสีการ์ด/ไซด์บาร์ของธีม Normal ให้เข้ากับพื้นหลัง
+local N = KRYVEX.Themes.Normal
+N.Background = Color3.fromRGB(30, 28, 30)
+N.Sidebar    = Color3.fromRGB(14, 13, 16)
+N.Card       = Color3.fromRGB(38, 36, 38)
+N.CardHover  = Color3.fromRGB(56, 52, 54)
+
+local PrevCreateWindow = KRYVEX.CreateWindow
+
+function KRYVEX:CreateWindow(config)
+
+    local Window = PrevCreateWindow(self, config)
+    local S = KRYVEX.MainShade
+
+    if S.Enabled and Window and Window.Main then
+
+        local Main = Window.Main
+        local Grad = Main:FindFirstChildOfClass("UIGradient")
+
+        -- ให้สีจริงมาจากเกรเดียนต์ล้วนๆ
+        Main.BackgroundColor3 = Color3.new(1, 1, 1)
+
+        if Grad then
+            Grad.Rotation = S.Rotation
+            Grad.Color = ColorSequence.new({
+                ColorSequenceKeypoint.new(0, S.Dark),
+                ColorSequenceKeypoint.new(0.5, S.Mid),
+                ColorSequenceKeypoint.new(1, S.Light),
+            })
+        end
+
+        if Window.BgImage then
+            Window.BgImage.Visible = false
+        end
+
+    end
+
+    return Window
+
+end
+
+--=========================================================
 -- RETURN
 --=========================================================
 
