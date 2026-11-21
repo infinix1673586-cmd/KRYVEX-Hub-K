@@ -13030,6 +13030,74 @@ function KRYVEX.AttachLayout(Tab)
 end
 
 --=========================================================
+-- PART D : BLACK GLASS + BROWN GRADIENT (ไม่มีรูปพื้นหลัง)
+--=========================================================
+
+-- 1) ตัดรูปพื้นหลัง (ID) ออกเกลี้ยง
+KRYVEX.Background.Enabled = false
+KRYVEX.Background.Image = ""
+KRYVEX.Background.File = ""
+KRYVEX.Background.Url = ""
+
+-- 2) ความโปร่งของหน้าต่างหลัก (ยิ่งน้อยยิ่งทึบ)
+KRYVEX.Glass.Main = 0.15
+
+-- 3) ปิดม่านสีส้ม/ม่วงของธีม Halloween กันสีตีกับเฉด
+KRYVEX.HalloweenFX.Tint = false
+
+-- 4) ปรับสีทุกธีมให้เป็นดำ + การ์ดโทนน้ำตาลเข้ม
+for _, theme in pairs(KRYVEX.Themes) do
+    theme.Background = Color3.fromRGB(8, 8, 10)
+    theme.Sidebar = Color3.fromRGB(6, 6, 8)
+    theme.Card = Color3.fromRGB(30, 24, 22)
+    theme.CardHover = Color3.fromRGB(48, 38, 34)
+end
+
+-- 5) เฉดไล่สีเหมือนในรูป (น้ำตาลอุ่นด้านบน -> ดำ -> น้ำเงินเข้มมุมล่างซ้าย)
+KRYVEX.MainShade = {
+    Rotation = 60,
+    Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(96, 68, 46)),
+        ColorSequenceKeypoint.new(0.45, Color3.fromRGB(46, 33, 27)),
+        ColorSequenceKeypoint.new(0.8, Color3.fromRGB(14, 12, 14)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 14, 34)),
+    }),
+}
+
+local PrevCreateWindow = KRYVEX.CreateWindow
+
+function KRYVEX:CreateWindow(config)
+
+    local Window = PrevCreateWindow(self, config)
+    local Main = Window.Main
+
+    if Main then
+
+        -- ให้เฉดไล่สีเป็นตัวกำหนดสีจริง (UIGradient คูณกับสีพื้น)
+        Main.BackgroundColor3 = Color3.new(1, 1, 1)
+
+        local Shade = Main:FindFirstChildOfClass("UIGradient")
+
+        if Shade then
+            Shade.Color = KRYVEX.MainShade.Color
+            Shade.Rotation = KRYVEX.MainShade.Rotation
+            Shade.Offset = Vector2.new(0, 0)
+        end
+
+        local Tint = Main:FindFirstChild("HalloweenTint")
+        if Tint then Tint:Destroy() end
+    end
+
+    if Window.BgImage then
+        Window.BgImage.Visible = false
+        Window.BgImage.Image = ""
+    end
+
+    return Window
+
+end
+
+--=========================================================
 -- RETURN
 --=========================================================
 
