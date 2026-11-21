@@ -3885,22 +3885,22 @@ function KRYVEX:CreateWindow(
     Window.Size =
         config.Size
         or Vector2.new(
-            700,
-            440
+            820,
+            520
         )
 
     Window.MinSize =
         config.MinSize
         or Vector2.new(
-            560,
-            360
+            640,
+            410
         )
 
     Window.MaxSize =
         config.MaxSize
         or Vector2.new(
-            1000,
-            650
+            1100,
+            720
         )
 
     Window.LastSize =
