@@ -13030,6 +13030,205 @@ function KRYVEX.AttachLayout(Tab)
 end
 
 --=========================================================
+-- PART D : CHROME ELEMENT STYLE (UICorner + ขอบเทา-ขาวไล่)
+-- วางเหนือ: return KRYVEX
+--=========================================================
+
+KRYVEX.ElementStyle = {
+    Enabled = true,
+    Corner = 10,            -- ความมนของ element
+    InnerCorner = 8,        -- ความมนของกล่องข้างใน (ช่องพิมพ์, ปุ่มย่อย)
+    StrokeThickness = 1.2,
+    StrokeIdle = 0.55,      -- ความโปร่งขอบตอนปกติ (0 = เข้มสุด)
+    StrokeHover = 0.12,     -- ตอน hover
+    Animate = true,         -- ขอบวิ่งวน
+    CardShade = true,       -- พื้นการ์ดไล่เฉด
+    Grey1 = Color3.fromRGB(70, 73, 82),
+    Grey2 = Color3.fromRGB(150, 154, 164),
+    White = Color3.fromRGB(250, 251, 255),
+}
+
+local StyleMethods = {
+    "CreateButton", "CreateToggle", "CreateSlider", "CreateInput",
+    "CreateDropdown", "CreateMultiDropdown", "CreateColorPicker",
+    "CreateKeybind", "CreateStatus", "CreateFeatureCard",
+    "CreateProfileCard", "CreateInfoCard", "CreateCommandBox",
+    "CreateCard", "CreateSearchBox",
+}
+
+local function ChromeStyle(Frame)
+
+    local S = KRYVEX.ElementStyle
+
+    if not S.Enabled or not Frame or not Frame.Parent then
+        return
+    end
+
+    if Frame:GetAttribute("ChromeStyled") then
+        return
+    end
+
+    Frame:SetAttribute("ChromeStyled", true)
+
+    -- 1) UICorner: ใช้ของเดิมถ้ามี ไม่งั้นสร้างใหม่
+    local Corner = Frame:FindFirstChildOfClass("UICorner")
+
+    if not Corner then
+        Corner = Instance.new("UICorner")
+        Corner.Parent = Frame
+    end
+
+    Corner.CornerRadius = UDim.new(0, S.Corner)
+
+    -- 2) เฉดพื้นการ์ด (ไล่เทาเข้ม -> เข้มกว่า + ไฮไลต์ขาวจาง ๆ)
+    if S.CardShade and Frame.BackgroundTransparency < 1 then
+
+        local Shade = Instance.new("UIGradient")
+        Shade.Name = "ChromeShade"
+        Shade.Rotation = 20
+        Shade.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 255, 255)),
+            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(196, 198, 205)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 152, 160)),
+        })
+        Shade.Parent = Frame
+
+    end
+
+    -- 3) ขอบไล่เทา-ขาว (ลบขอบเก่าของเฟรมนี้ที่ไม่ใช่ glow/chrome ทิ้งก่อน)
+    for _, Child in ipairs(Frame:GetChildren()) do
+        if Child:IsA("UIStroke")
+            and Child.Name ~= "KRYVEX_Glow"
+            and Child.Name ~= "ChromeStroke"
+            and Child.Parent == Frame
+        then
+            Child:Destroy()
+        end
+    end
+
+    local Stroke = Instance.new("UIStroke")
+    Stroke.Name = "ChromeStroke"
+    Stroke.Color = Color3.new(1, 1, 1)
+    Stroke.Thickness = S.StrokeThickness
+    Stroke.Transparency = S.StrokeIdle
+    Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    Stroke.Parent = Frame
+
+    local Grad = Instance.new("UIGradient")
+    Grad.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, S.Grey1),
+        ColorSequenceKeypoint.new(0.3, S.Grey2),
+        ColorSequenceKeypoint.new(0.5, S.White),
+        ColorSequenceKeypoint.new(0.7, S.Grey2),
+        ColorSequenceKeypoint.new(1, S.Grey1),
+    })
+    Grad.Rotation = 0
+    Grad.Parent = Stroke
+
+    -- 4) ขอบวิ่งวนช้า ๆ (ใช้ Heartbeat เดียวต่อ element แบบเบา ๆ)
+    if S.Animate then
+
+        local Offset = math.random()
+        local Conn
+
+        Conn = RunService.Heartbeat:Connect(function(dt)
+
+            if not Frame.Parent then
+                Conn:Disconnect()
+                return
+            end
+
+            Offset = (Offset + dt * 0.18) % 2
+            Grad.Offset = Vector2.new(Offset - 1, 0)
+
+        end)
+
+    end
+
+    -- 5) hover: ขอบสว่างขึ้น
+    local Target = Frame:FindFirstChild("ActionButton") or Frame
+
+    if Target:IsA("GuiObject") then
+
+        Target.MouseEnter:Connect(function()
+            PlayTween(Stroke, 0.15, {
+                Transparency = S.StrokeHover,
+                Thickness = S.StrokeThickness + 0.5,
+            })
+        end)
+
+        Target.MouseLeave:Connect(function()
+            PlayTween(Stroke, 0.2, {
+                Transparency = S.StrokeIdle,
+                Thickness = S.StrokeThickness,
+            })
+        end)
+
+    end
+
+    -- 6) กล่องข้างใน (TextBox, ปุ่มย่อย) ให้มนเท่ากัน
+    for _, Child in ipairs(Frame:GetChildren()) do
+        if Child:IsA("TextBox") or (Child:IsA("TextButton") and Child.Name ~= "ActionButton" and Child.Name ~= "Switch") then
+            local C = Child:FindFirstChildOfClass("UICorner")
+            if C then
+                C.CornerRadius = UDim.new(0, S.InnerCorner)
+            end
+        end
+    end
+
+end
+
+-- ห่อ AttachLayout อีกชั้น: ทุกครั้งที่สร้าง element ใหม่ จะถูกตกแต่งอัตโนมัติ
+local PrevAttachLayout = KRYVEX.AttachLayout
+
+function KRYVEX.AttachLayout(Tab)
+
+    Tab = PrevAttachLayout(Tab)
+
+    local Page = Tab.Page
+
+    if not Page then
+        return Tab
+    end
+
+    -- จับ element ที่เกิดใหม่ทั้งในหน้า และในคอลัมน์ซ้าย/ขวา
+    local function Watch(Container)
+
+        Container.ChildAdded:Connect(function(Child)
+
+            if Child:IsA("Frame")
+                and Child.Name ~= "Heading"
+                and Child.Name ~= "Section"
+                and Child.Name ~= "ColumnsRow"
+                and Child.BackgroundTransparency < 1
+            then
+                task.defer(ChromeStyle, Child)
+            end
+
+            if Child.Name == "ColumnsRow" then
+                for _, Col in ipairs(Child:GetChildren()) do
+                    if Col:IsA("GuiObject") and Col.Name:match("^Column") then
+                        Watch(Col)
+                    end
+                end
+                Child.ChildAdded:Connect(function(Col)
+                    if Col.Name:match("^Column") then
+                        task.defer(Watch, Col)
+                    end
+                end)
+            end
+
+        end)
+
+    end
+
+    Watch(Page)
+
+    return Tab
+
+end
+
+--=========================================================
 -- RETURN
 --=========================================================
 
