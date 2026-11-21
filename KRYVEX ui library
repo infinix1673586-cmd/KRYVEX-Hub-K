@@ -166,12 +166,12 @@ local function CloneTheme(source, patch)
     for key, value in pairs(patch or {}) do result[key] = value end
     return result
 end
-KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="normal", Animation="clean", IsHalloween=false, Background=Color3.fromRGB(7,8,10), Sidebar=Color3.fromRGB(12,13,16), Card=Color3.fromRGB(22,23,27), CardHover=Color3.fromRGB(39,40,46), Primary=Color3.fromRGB(205,207,214), PrimaryDark=Color3.fromRGB(105,108,117), Text=Color3.fromRGB(248,249,252), SubText=Color3.fromRGB(166,169,177), Stroke1=Color3.fromRGB(67,69,77), Stroke2=Color3.fromRGB(215,217,223), Stroke3=Color3.fromRGB(112,115,124), Sheen1=Color3.fromRGB(118,120,128), Sheen2=Color3.fromRGB(8,9,11), Sheen3=Color3.fromRGB(48,50,57), FloatBg=Color3.fromRGB(7,8,10), FloatEdge1=Color3.fromRGB(105,108,117), FloatEdge2=Color3.fromRGB(222,224,230), FxDark=Color3.fromRGB(38,40,46), FxMid=Color3.fromRGB(112,115,124), FxSilver=Color3.fromRGB(176,179,187), FxLight=Color3.fromRGB(224,226,232), FxWhite=Color3.fromRGB(255,255,255) })
+KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="normal", Animation="clean", IsHalloween=false, Background=Color3.fromRGB(17,18,22), Sidebar=Color3.fromRGB(11,12,16), Card=Color3.fromRGB(27,29,34), CardHover=Color3.fromRGB(44,47,55), Primary=Color3.fromRGB(198,203,212), PrimaryDark=Color3.fromRGB(105,110,120), Text=Color3.fromRGB(247,248,250), SubText=Color3.fromRGB(168,173,182), Stroke1=Color3.fromRGB(78,83,93), Stroke2=Color3.fromRGB(235,238,243), Stroke3=Color3.fromRGB(135,141,151), Sheen1=Color3.fromRGB(255,255,255), Sheen2=Color3.fromRGB(174,179,188), Sheen3=Color3.fromRGB(236,238,242), FloatBg=Color3.fromRGB(12,13,17), FloatEdge1=Color3.fromRGB(126,132,143), FloatEdge2=Color3.fromRGB(246,247,250), FxDark=Color3.fromRGB(65,69,78), FxMid=Color3.fromRGB(126,132,143), FxSilver=Color3.fromRGB(191,197,207), FxLight=Color3.fromRGB(232,235,240), FxWhite=Color3.fromRGB(255,255,255) })
 KRYVEX.Themes.Christmas = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="christmas", Animation="snow", IsHalloween=false, Background=Color3.fromRGB(18,35,42), Sidebar=Color3.fromRGB(13,28,34), Card=Color3.fromRGB(27,58,61), CardHover=Color3.fromRGB(39,83,80), Primary=Color3.fromRGB(218,55,68), PrimaryDark=Color3.fromRGB(145,30,45), Text=Color3.fromRGB(245,255,246), SubText=Color3.fromRGB(170,211,198), Stroke1=Color3.fromRGB(25,125,95), Stroke2=Color3.fromRGB(235,70,80), Stroke3=Color3.fromRGB(205,180,80), Sheen1=Color3.fromRGB(255,245,205), Sheen2=Color3.fromRGB(205,60,75), Sheen3=Color3.fromRGB(160,235,205), FloatBg=Color3.fromRGB(10,28,29), FloatEdge1=Color3.fromRGB(205,50,65), FloatEdge2=Color3.fromRGB(255,225,125), FxDark=Color3.fromRGB(20,85,67), FxMid=Color3.fromRGB(80,175,130), FxSilver=Color3.fromRGB(235,245,255), FxLight=Color3.fromRGB(255,245,210), FxWhite=Color3.fromRGB(255,255,255) })
 KRYVEX.Themes.Valentine = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="valentine", Animation="hearts", IsHalloween=false, Background=Color3.fromRGB(45,18,34), Sidebar=Color3.fromRGB(31,12,25), Card=Color3.fromRGB(72,28,54), CardHover=Color3.fromRGB(100,38,72), Primary=Color3.fromRGB(255,82,145), PrimaryDark=Color3.fromRGB(170,35,90), Text=Color3.fromRGB(255,239,247), SubText=Color3.fromRGB(220,160,190), Stroke1=Color3.fromRGB(175,45,105), Stroke2=Color3.fromRGB(255,115,175), Stroke3=Color3.fromRGB(215,75,135), Sheen1=Color3.fromRGB(255,190,220), Sheen2=Color3.fromRGB(220,70,140), Sheen3=Color3.fromRGB(255,235,245), FloatBg=Color3.fromRGB(30,9,23), FloatEdge1=Color3.fromRGB(220,55,125), FloatEdge2=Color3.fromRGB(255,170,210), FxDark=Color3.fromRGB(130,25,75), FxMid=Color3.fromRGB(230,70,145), FxSilver=Color3.fromRGB(255,155,205), FxLight=Color3.fromRGB(255,110,175), FxWhite=Color3.fromRGB(255,245,250) })
 KRYVEX.Themes.Summer = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="summer", Animation="bubbles", IsHalloween=false, Background=Color3.fromRGB(12,47,64), Sidebar=Color3.fromRGB(8,33,49), Card=Color3.fromRGB(19,78,91), CardHover=Color3.fromRGB(27,108,119), Primary=Color3.fromRGB(255,194,62), PrimaryDark=Color3.fromRGB(190,112,25), Text=Color3.fromRGB(239,255,255), SubText=Color3.fromRGB(143,211,220), Stroke1=Color3.fromRGB(20,155,175), Stroke2=Color3.fromRGB(255,205,85), Stroke3=Color3.fromRGB(50,205,195), Sheen1=Color3.fromRGB(255,239,145), Sheen2=Color3.fromRGB(30,185,210), Sheen3=Color3.fromRGB(210,255,240), FloatBg=Color3.fromRGB(5,28,41), FloatEdge1=Color3.fromRGB(35,190,210), FloatEdge2=Color3.fromRGB(255,220,100), FxDark=Color3.fromRGB(15,105,130), FxMid=Color3.fromRGB(40,190,205), FxSilver=Color3.fromRGB(155,245,235), FxLight=Color3.fromRGB(255,220,100), FxWhite=Color3.fromRGB(245,255,255) })
 KRYVEX.ThemeAliases = { grey="normal", default="normal", normal="normal", halloween="halloween", christmas="christmas", xmas="christmas", valentine="valentine", valentines="valentine", summer="summer" }
-KRYVEX.ThemeSettings = { Theme="normal", Animation=true }
+KRYVEX.ThemeSettings = { Theme="halloween", Animation=true }
 
 KRYVEX.HalloweenSeason = {
     Month = 10,
@@ -193,7 +193,7 @@ function KRYVEX:SetTheme(mode)
     self.ThemeSettings.Theme = mode
     return self.Theme
 end
-KRYVEX:SetTheme("normal")
+KRYVEX:SetTheme("halloween")
 --=========================================================
 -- GLASS (เน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธเธเน€เธเธ…เน€เธเธ‘เน€เธยเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธ’)
 --=========================================================
@@ -226,9 +226,9 @@ KRYVEX.LogoImage = "rbxassetid://72018461815575"
 
 KRYVEX.Background = {
 
-    Enabled = false,
+    Enabled = true,
 
-    Image = "",
+    Image = "rbxassetid://114611759742732",
 
     File = "Kryvex_bg.jpg",
 
@@ -3989,9 +3989,6 @@ function KRYVEX:CreateWindow(
                 BackgroundColor3 =
                     KRYVEX.Theme.Background,
 
-                BackgroundTransparency =
-                    KRYVEX.Glass.Main,
-
                 BorderSizePixel =
                     0,
 
@@ -4023,33 +4020,23 @@ function KRYVEX:CreateWindow(
 
             ColorSequenceKeypoint.new(
                 0,
-                Color3.fromRGB(72, 75, 84)
+                Color3.fromRGB(38, 40, 46)
             ),
 
             ColorSequenceKeypoint.new(
-                0.16,
-                Color3.fromRGB(25, 27, 32)
-            ),
-
-            ColorSequenceKeypoint.new(
-                0.48,
-                Color3.fromRGB(4, 5, 7)
-            ),
-
-            ColorSequenceKeypoint.new(
-                0.82,
-                Color3.fromRGB(20, 22, 27)
+                0.42,
+                Color3.fromRGB(5, 6, 8)
             ),
 
             ColorSequenceKeypoint.new(
                 1,
-                Color3.fromRGB(57, 60, 68)
+                Color3.fromRGB(22, 24, 29)
             ),
 
         })
 
     MainSheen.Rotation =
-        28
+        35
 
     MainSheen.Parent =
         Main
@@ -4075,9 +4062,12 @@ function KRYVEX:CreateWindow(
                 BackgroundTransparency =
                     1,
 
-                Image = "",
+                Image =
+                    ResolveBackground()
+                    or "",
 
-                ImageTransparency = 1,
+                ImageTransparency =
+                    KRYVEX.Background.Transparency,
 
                 ScaleType =
                     Enum.ScaleType.Crop,
@@ -4085,7 +4075,8 @@ function KRYVEX:CreateWindow(
                 ZIndex =
                     0,
 
-                Visible = false,
+                Visible =
+                    ResolveBackground() ~= nil,
 
             }
         )
@@ -4105,145 +4096,6 @@ function KRYVEX:CreateWindow(
         BgImage,
         "\u{E1E}\u{E37}\u{E49}\u{E19}\u{E2B}\u{E25}\u{E31}\u{E07}"
     )
-
-    --=====================================================
-    -- CHROME GLASS DECORATION
-    --=====================================================
-
-    local function AddChromeSlash(name, position, size, rotation, alpha)
-        local Slash = Create("Frame", {
-            Name = name,
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = position,
-            Size = size,
-            Rotation = rotation,
-            BackgroundColor3 = Color3.fromRGB(225, 228, 235),
-            BackgroundTransparency = alpha or 0.88,
-            BorderSizePixel = 0,
-            ZIndex = 1,
-        })
-        Slash.Parent = Main
-
-        local Gradient = Instance.new("UIGradient")
-        Gradient.Rotation = 90
-        Gradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 73, 81)),
-            ColorSequenceKeypoint.new(0.5, Color3.fromRGB(245, 247, 250)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(65, 68, 76)),
-        })
-        Gradient.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 0.96),
-            NumberSequenceKeypoint.new(0.5, 0.48),
-            NumberSequenceKeypoint.new(1, 0.96),
-        })
-        Gradient.Parent = Slash
-        return Slash
-    end
-
-    AddChromeSlash("ChromeSlashTopA", UDim2.new(1, -76, 0, 42), UDim2.fromOffset(15, 150), 42, 0.86)
-    AddChromeSlash("ChromeSlashTopB", UDim2.new(1, -48, 0, 42), UDim2.fromOffset(8, 112), 42, 0.88)
-    AddChromeSlash("ChromeSlashBottomA", UDim2.new(0, 34, 1, -30), UDim2.fromOffset(12, 105), 42, 0.88)
-
-    local TopGlass = Create("Frame", {
-        Name = "ChromeHeaderGlass",
-        Size = UDim2.new(1, 0, 0, 58),
-        BackgroundColor3 = Color3.fromRGB(17, 18, 22),
-        BackgroundTransparency = 0.22,
-        BorderSizePixel = 0,
-        ZIndex = 1,
-    })
-    TopGlass.Parent = Main
-
-    local TopGlassGradient = Instance.new("UIGradient")
-    TopGlassGradient.Rotation = 90
-    TopGlassGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 72, 80)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(7, 8, 10)),
-    })
-    TopGlassGradient.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.58),
-        NumberSequenceKeypoint.new(1, 0.12),
-    })
-    TopGlassGradient.Parent = TopGlass
-
-    local HeaderEdge = Create("Frame", {
-        Name = "ChromeHeaderEdge",
-        Position = UDim2.new(0, 0, 0, 57),
-        Size = UDim2.new(1, 0, 0, 1),
-        BackgroundColor3 = Color3.fromRGB(205, 208, 216),
-        BackgroundTransparency = 0.72,
-        BorderSizePixel = 0,
-        ZIndex = 2,
-    })
-    HeaderEdge.Parent = Main
-
-    --=====================================================
-    -- FULL GLASS / CHROME SURFACE DETAILS
-    --=====================================================
-
-    local function AddChromeGlow(name, position, size, rotation, transparency)
-        local Glow = Create("Frame", {
-            Name = name,
-            AnchorPoint = Vector2.new(0.5, 0.5),
-            Position = position,
-            Size = size,
-            Rotation = rotation or 0,
-            BackgroundColor3 = Color3.fromRGB(235, 238, 245),
-            BackgroundTransparency = 0,
-            BorderSizePixel = 0,
-            ZIndex = 1,
-        })
-        Glow.Parent = Main
-
-        local GlowGradient = Instance.new("UIGradient")
-        GlowGradient.Rotation = 0
-        GlowGradient.Color = ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 73, 82)),
-            ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 255, 255)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 83, 92)),
-        })
-        GlowGradient.Transparency = NumberSequence.new({
-            NumberSequenceKeypoint.new(0, 1),
-            NumberSequenceKeypoint.new(0.35, transparency or 0.58),
-            NumberSequenceKeypoint.new(0.5, 0.18),
-            NumberSequenceKeypoint.new(0.68, transparency or 0.58),
-            NumberSequenceKeypoint.new(1, 1),
-        })
-        GlowGradient.Parent = Glow
-        return Glow
-    end
-
-    -- Thin reflective strips on all four corners.
-    AddChromeGlow("ChromeTopLeftGlow", UDim2.new(0, 62, 0, 2), UDim2.fromOffset(118, 5), 0, 0.62)
-    AddChromeGlow("ChromeTopRightGlow", UDim2.new(1, -66, 0, 2), UDim2.fromOffset(132, 5), 0, 0.56)
-    AddChromeGlow("ChromeBottomLeftGlow", UDim2.new(0, 70, 1, -2), UDim2.fromOffset(130, 5), 0, 0.58)
-    AddChromeGlow("ChromeBottomRightGlow", UDim2.new(1, -72, 1, -2), UDim2.fromOffset(140, 5), 0, 0.54)
-
-    -- Longer diagonal facets inspired by the chrome HUD reference.
-    AddChromeSlash("ChromeFacetTopRight1", UDim2.new(1, -92, 0, 38), UDim2.fromOffset(18, 178), 42, 0.76)
-    AddChromeSlash("ChromeFacetTopRight2", UDim2.new(1, -58, 0, 34), UDim2.fromOffset(9, 132), 42, 0.82)
-    AddChromeSlash("ChromeFacetBottomLeft1", UDim2.new(0, 38, 1, -44), UDim2.fromOffset(18, 145), 42, 0.80)
-    AddChromeSlash("ChromeFacetBottomLeft2", UDim2.new(0, 72, 1, -38), UDim2.fromOffset(9, 108), 42, 0.84)
-
-    -- Inner bevel: a soft metallic outline inset from the outer frame.
-    local InnerBevel = Create("Frame", {
-        Name = "ChromeInnerBevel",
-        Position = UDim2.fromOffset(5, 5),
-        Size = UDim2.new(1, -10, 1, -10),
-        BackgroundTransparency = 1,
-        BorderSizePixel = 0,
-        ZIndex = 1,
-    })
-    InnerBevel.Parent = Main
-    AddCorner(InnerBevel, 13)
-
-    local BevelStroke = AddStroke(
-        InnerBevel,
-        Color3.fromRGB(215, 219, 228),
-        0.82,
-        1
-    )
-    BevelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     --=====================================================
     -- HIDE SCALE
@@ -4281,22 +4133,6 @@ function KRYVEX:CreateWindow(
             0.05,
             1.7
         )
-
-    local OuterChromeStroke = AddStroke(
-        Main,
-        Color3.fromRGB(220, 223, 230),
-        0.76,
-        5
-    )
-    OuterChromeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-    local InnerChromeStroke = AddStroke(
-        Main,
-        Color3.fromRGB(255, 255, 255),
-        0.72,
-        1
-    )
-    InnerChromeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     local BorderGradient =
         Instance.new(
@@ -5016,25 +4852,6 @@ function KRYVEX:CreateWindow(
     Sidebar.Parent =
         Main
 
-    local SidebarGradient = Instance.new("UIGradient")
-    SidebarGradient.Rotation = 0
-    SidebarGradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(19, 20, 24)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(7, 8, 10)),
-    })
-    SidebarGradient.Parent = Sidebar
-
-    local SidebarDivider = Create("Frame", {
-        Name = "ChromeSidebarDivider",
-        AnchorPoint = Vector2.new(1, 0),
-        Position = UDim2.new(1, 0, 0, 0),
-        Size = UDim2.new(0, 1, 1, 0),
-        BackgroundColor3 = Color3.fromRGB(190, 194, 202),
-        BackgroundTransparency = 0.78,
-        BorderSizePixel = 0,
-    })
-    SidebarDivider.Parent = Sidebar
-
     --=====================================================
     -- PROFILE
     --=====================================================
@@ -5070,13 +4887,6 @@ function KRYVEX:CreateWindow(
     AddCorner(
         Profile,
         10
-    )
-
-    AddStroke(
-        Profile,
-        Color3.fromRGB(190, 194, 202),
-        0.78,
-        1
     )
 
     --=====================================================
@@ -6020,14 +5830,17 @@ function KRYVEX:CreateWindow(
         Main.BackgroundTransparency =
             1
 
-        BgImage.Visible =
-            false
-
-        BgImage.Image =
-            ""
-
         BgImage.ImageTransparency =
             1
+
+        PlayTween(
+            BgImage,
+            0.4,
+            {
+                ImageTransparency =
+                    KRYVEX.Background.Transparency
+            }
+        )
 
         Main.Active =
             true
@@ -10957,18 +10770,19 @@ function KRYVEX:CreateWindow(
         0.85
 
     Main.BackgroundTransparency =
-        KRYVEX.Glass.Main
-
-    BgImage.Visible =
-        false
-
-    BgImage.Image =
-        ""
+        1
 
     BgImage.ImageTransparency =
         1
 
-    -- Background image layer intentionally disabled: solid black/charcoal UI.
+    PlayTween(
+        BgImage,
+        0.6,
+        {
+            ImageTransparency =
+                KRYVEX.Background.Transparency
+        }
+    )
 
     PlayTween(
         HideScale,
@@ -12049,8 +11863,6 @@ KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, {
     NebulaB = Color3.fromRGB(38, 41, 47),
 })
 
--- Re-select Normal after its final palette definition so KRYVEX.Theme
--- points at this updated table rather than the earlier default palette.
 KRYVEX:SetTheme("normal")
 
 --=========================================================
@@ -12058,14 +11870,14 @@ KRYVEX:SetTheme("normal")
 --=========================================================
 
 KRYVEX.NormalFX = {
-    Intro = true,        -- opening intro animation
-    Nebula = true,       -- soft background nebula
-    Stars = true,        -- drifting stars
-    ShootingStar = true, -- shooting-star accent
-    LogoOrbit = true,    -- logo orbit animation
-    HeaderLine = true,   -- animated header highlight
-    TitleShine = true,   -- title shine
-    BorderPulse = true,  -- breathing border
+    Intro = true,        -- ฉากเปิด: วาร์ปผ่านอวกาศ -> ดาวเคราะห์ + วงแหวน
+    Nebula = true,       -- เนบิวลาลอยหลังเนื้อหา
+    Stars = true,        -- ดาวระยิบระยับเลื่อนช้าๆ
+    ShootingStar = true, -- ดาวตก
+    LogoOrbit = true,    -- ดวงจันทร์โคจรรอบโลโก้
+    HeaderLine = true,   -- เส้นไล่แสงใต้หัว
+    TitleShine = true,   -- ชื่อไล่ประกาย
+    BorderPulse = true,  -- ขอบหายใจ
 }
 
 local OriginalSeasonFX = KRYVEX.BuildSeasonFX
