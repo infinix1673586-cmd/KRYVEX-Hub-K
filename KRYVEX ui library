@@ -4023,17 +4023,27 @@ function KRYVEX:CreateWindow(
 
             ColorSequenceKeypoint.new(
                 0,
-                Color3.fromRGB(38, 40, 46)
+                Color3.fromRGB(72, 75, 84)
             ),
 
             ColorSequenceKeypoint.new(
-                0.42,
-                Color3.fromRGB(5, 6, 8)
+                0.16,
+                Color3.fromRGB(25, 27, 32)
+            ),
+
+            ColorSequenceKeypoint.new(
+                0.48,
+                Color3.fromRGB(4, 5, 7)
+            ),
+
+            ColorSequenceKeypoint.new(
+                0.82,
+                Color3.fromRGB(20, 22, 27)
             ),
 
             ColorSequenceKeypoint.new(
                 1,
-                Color3.fromRGB(22, 24, 29)
+                Color3.fromRGB(57, 60, 68)
             ),
 
         })
@@ -4130,9 +4140,9 @@ function KRYVEX:CreateWindow(
         return Slash
     end
 
-    AddChromeSlash("ChromeSlashTopA", UDim2.new(1, -76, 0, 42), UDim2.fromOffset(15, 150), 42, 0.92)
-    AddChromeSlash("ChromeSlashTopB", UDim2.new(1, -48, 0, 42), UDim2.fromOffset(8, 112), 42, 0.94)
-    AddChromeSlash("ChromeSlashBottomA", UDim2.new(0, 34, 1, -30), UDim2.fromOffset(12, 105), 42, 0.94)
+    AddChromeSlash("ChromeSlashTopA", UDim2.new(1, -76, 0, 42), UDim2.fromOffset(15, 150), 42, 0.86)
+    AddChromeSlash("ChromeSlashTopB", UDim2.new(1, -48, 0, 42), UDim2.fromOffset(8, 112), 42, 0.88)
+    AddChromeSlash("ChromeSlashBottomA", UDim2.new(0, 34, 1, -30), UDim2.fromOffset(12, 105), 42, 0.88)
 
     local TopGlass = Create("Frame", {
         Name = "ChromeHeaderGlass",
@@ -4166,6 +4176,74 @@ function KRYVEX:CreateWindow(
         ZIndex = 2,
     })
     HeaderEdge.Parent = Main
+
+    --=====================================================
+    -- FULL GLASS / CHROME SURFACE DETAILS
+    --=====================================================
+
+    local function AddChromeGlow(name, position, size, rotation, transparency)
+        local Glow = Create("Frame", {
+            Name = name,
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = position,
+            Size = size,
+            Rotation = rotation or 0,
+            BackgroundColor3 = Color3.fromRGB(235, 238, 245),
+            BackgroundTransparency = 0,
+            BorderSizePixel = 0,
+            ZIndex = 1,
+        })
+        Glow.Parent = Main
+
+        local GlowGradient = Instance.new("UIGradient")
+        GlowGradient.Rotation = 0
+        GlowGradient.Color = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 73, 82)),
+            ColorSequenceKeypoint.new(0.48, Color3.fromRGB(255, 255, 255)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(80, 83, 92)),
+        })
+        GlowGradient.Transparency = NumberSequence.new({
+            NumberSequenceKeypoint.new(0, 1),
+            NumberSequenceKeypoint.new(0.35, transparency or 0.58),
+            NumberSequenceKeypoint.new(0.5, 0.18),
+            NumberSequenceKeypoint.new(0.68, transparency or 0.58),
+            NumberSequenceKeypoint.new(1, 1),
+        })
+        GlowGradient.Parent = Glow
+        return Glow
+    end
+
+    -- Thin reflective strips on all four corners.
+    AddChromeGlow("ChromeTopLeftGlow", UDim2.new(0, 62, 0, 2), UDim2.fromOffset(118, 5), 0, 0.62)
+    AddChromeGlow("ChromeTopRightGlow", UDim2.new(1, -66, 0, 2), UDim2.fromOffset(132, 5), 0, 0.56)
+    AddChromeGlow("ChromeBottomLeftGlow", UDim2.new(0, 70, 1, -2), UDim2.fromOffset(130, 5), 0, 0.58)
+    AddChromeGlow("ChromeBottomRightGlow", UDim2.new(1, -72, 1, -2), UDim2.fromOffset(140, 5), 0, 0.54)
+
+    -- Longer diagonal facets inspired by the chrome HUD reference.
+    AddChromeSlash("ChromeFacetTopRight1", UDim2.new(1, -92, 0, 38), UDim2.fromOffset(18, 178), 42, 0.76)
+    AddChromeSlash("ChromeFacetTopRight2", UDim2.new(1, -58, 0, 34), UDim2.fromOffset(9, 132), 42, 0.82)
+    AddChromeSlash("ChromeFacetBottomLeft1", UDim2.new(0, 38, 1, -44), UDim2.fromOffset(18, 145), 42, 0.80)
+    AddChromeSlash("ChromeFacetBottomLeft2", UDim2.new(0, 72, 1, -38), UDim2.fromOffset(9, 108), 42, 0.84)
+
+    -- Inner bevel: a soft metallic outline inset from the outer frame.
+    local InnerBevel = Create("Frame", {
+        Name = "ChromeInnerBevel",
+        Position = UDim2.fromOffset(5, 5),
+        Size = UDim2.new(1, -10, 1, -10),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ZIndex = 1,
+    })
+    InnerBevel.Parent = Main
+    AddCorner(InnerBevel, 13)
+
+    local BevelStroke = AddStroke(
+        InnerBevel,
+        Color3.fromRGB(215, 219, 228),
+        0.82,
+        1
+    )
+    BevelStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     --=====================================================
     -- HIDE SCALE
@@ -5940,7 +6018,7 @@ function KRYVEX:CreateWindow(
             0.82
 
         Main.BackgroundTransparency =
-            0
+            1
 
         BgImage.Visible =
             false
@@ -11980,14 +12058,14 @@ KRYVEX:SetTheme("normal")
 --=========================================================
 
 KRYVEX.NormalFX = {
-    Intro = false,
-    Nebula = false,
-    Stars = false,
-    ShootingStar = false,
-    LogoOrbit = false,
-    HeaderLine = false,
-    TitleShine = false,
-    BorderPulse = false,
+    Intro = true,        -- opening intro animation
+    Nebula = true,       -- soft background nebula
+    Stars = true,        -- drifting stars
+    ShootingStar = true, -- shooting-star accent
+    LogoOrbit = true,    -- logo orbit animation
+    HeaderLine = true,   -- animated header highlight
+    TitleShine = true,   -- title shine
+    BorderPulse = true,  -- breathing border
 }
 
 local OriginalSeasonFX = KRYVEX.BuildSeasonFX
