@@ -166,12 +166,12 @@ local function CloneTheme(source, patch)
     for key, value in pairs(patch or {}) do result[key] = value end
     return result
 end
-KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="normal", Animation="clean", IsHalloween=false, Background=Color3.fromRGB(17,18,22), Sidebar=Color3.fromRGB(11,12,16), Card=Color3.fromRGB(27,29,34), CardHover=Color3.fromRGB(44,47,55), Primary=Color3.fromRGB(198,203,212), PrimaryDark=Color3.fromRGB(105,110,120), Text=Color3.fromRGB(247,248,250), SubText=Color3.fromRGB(168,173,182), Stroke1=Color3.fromRGB(78,83,93), Stroke2=Color3.fromRGB(235,238,243), Stroke3=Color3.fromRGB(135,141,151), Sheen1=Color3.fromRGB(255,255,255), Sheen2=Color3.fromRGB(174,179,188), Sheen3=Color3.fromRGB(236,238,242), FloatBg=Color3.fromRGB(12,13,17), FloatEdge1=Color3.fromRGB(126,132,143), FloatEdge2=Color3.fromRGB(246,247,250), FxDark=Color3.fromRGB(65,69,78), FxMid=Color3.fromRGB(126,132,143), FxSilver=Color3.fromRGB(191,197,207), FxLight=Color3.fromRGB(232,235,240), FxWhite=Color3.fromRGB(255,255,255) })
+KRYVEX.Themes.Normal = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="normal", Animation="clean", IsHalloween=false, Background=Color3.fromRGB(7,8,10), Sidebar=Color3.fromRGB(12,13,16), Card=Color3.fromRGB(22,23,27), CardHover=Color3.fromRGB(39,40,46), Primary=Color3.fromRGB(205,207,214), PrimaryDark=Color3.fromRGB(105,108,117), Text=Color3.fromRGB(248,249,252), SubText=Color3.fromRGB(166,169,177), Stroke1=Color3.fromRGB(67,69,77), Stroke2=Color3.fromRGB(215,217,223), Stroke3=Color3.fromRGB(112,115,124), Sheen1=Color3.fromRGB(118,120,128), Sheen2=Color3.fromRGB(8,9,11), Sheen3=Color3.fromRGB(48,50,57), FloatBg=Color3.fromRGB(7,8,10), FloatEdge1=Color3.fromRGB(105,108,117), FloatEdge2=Color3.fromRGB(222,224,230), FxDark=Color3.fromRGB(38,40,46), FxMid=Color3.fromRGB(112,115,124), FxSilver=Color3.fromRGB(176,179,187), FxLight=Color3.fromRGB(224,226,232), FxWhite=Color3.fromRGB(255,255,255) })
 KRYVEX.Themes.Christmas = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="christmas", Animation="snow", IsHalloween=false, Background=Color3.fromRGB(18,35,42), Sidebar=Color3.fromRGB(13,28,34), Card=Color3.fromRGB(27,58,61), CardHover=Color3.fromRGB(39,83,80), Primary=Color3.fromRGB(218,55,68), PrimaryDark=Color3.fromRGB(145,30,45), Text=Color3.fromRGB(245,255,246), SubText=Color3.fromRGB(170,211,198), Stroke1=Color3.fromRGB(25,125,95), Stroke2=Color3.fromRGB(235,70,80), Stroke3=Color3.fromRGB(205,180,80), Sheen1=Color3.fromRGB(255,245,205), Sheen2=Color3.fromRGB(205,60,75), Sheen3=Color3.fromRGB(160,235,205), FloatBg=Color3.fromRGB(10,28,29), FloatEdge1=Color3.fromRGB(205,50,65), FloatEdge2=Color3.fromRGB(255,225,125), FxDark=Color3.fromRGB(20,85,67), FxMid=Color3.fromRGB(80,175,130), FxSilver=Color3.fromRGB(235,245,255), FxLight=Color3.fromRGB(255,245,210), FxWhite=Color3.fromRGB(255,255,255) })
 KRYVEX.Themes.Valentine = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="valentine", Animation="hearts", IsHalloween=false, Background=Color3.fromRGB(45,18,34), Sidebar=Color3.fromRGB(31,12,25), Card=Color3.fromRGB(72,28,54), CardHover=Color3.fromRGB(100,38,72), Primary=Color3.fromRGB(255,82,145), PrimaryDark=Color3.fromRGB(170,35,90), Text=Color3.fromRGB(255,239,247), SubText=Color3.fromRGB(220,160,190), Stroke1=Color3.fromRGB(175,45,105), Stroke2=Color3.fromRGB(255,115,175), Stroke3=Color3.fromRGB(215,75,135), Sheen1=Color3.fromRGB(255,190,220), Sheen2=Color3.fromRGB(220,70,140), Sheen3=Color3.fromRGB(255,235,245), FloatBg=Color3.fromRGB(30,9,23), FloatEdge1=Color3.fromRGB(220,55,125), FloatEdge2=Color3.fromRGB(255,170,210), FxDark=Color3.fromRGB(130,25,75), FxMid=Color3.fromRGB(230,70,145), FxSilver=Color3.fromRGB(255,155,205), FxLight=Color3.fromRGB(255,110,175), FxWhite=Color3.fromRGB(255,245,250) })
 KRYVEX.Themes.Summer = CloneTheme(KRYVEX.Themes.Grey, { ThemeId="summer", Animation="bubbles", IsHalloween=false, Background=Color3.fromRGB(12,47,64), Sidebar=Color3.fromRGB(8,33,49), Card=Color3.fromRGB(19,78,91), CardHover=Color3.fromRGB(27,108,119), Primary=Color3.fromRGB(255,194,62), PrimaryDark=Color3.fromRGB(190,112,25), Text=Color3.fromRGB(239,255,255), SubText=Color3.fromRGB(143,211,220), Stroke1=Color3.fromRGB(20,155,175), Stroke2=Color3.fromRGB(255,205,85), Stroke3=Color3.fromRGB(50,205,195), Sheen1=Color3.fromRGB(255,239,145), Sheen2=Color3.fromRGB(30,185,210), Sheen3=Color3.fromRGB(210,255,240), FloatBg=Color3.fromRGB(5,28,41), FloatEdge1=Color3.fromRGB(35,190,210), FloatEdge2=Color3.fromRGB(255,220,100), FxDark=Color3.fromRGB(15,105,130), FxMid=Color3.fromRGB(40,190,205), FxSilver=Color3.fromRGB(155,245,235), FxLight=Color3.fromRGB(255,220,100), FxWhite=Color3.fromRGB(245,255,255) })
 KRYVEX.ThemeAliases = { grey="normal", default="normal", normal="normal", halloween="halloween", christmas="christmas", xmas="christmas", valentine="valentine", valentines="valentine", summer="summer" }
-KRYVEX.ThemeSettings = { Theme="halloween", Animation=true }
+KRYVEX.ThemeSettings = { Theme="normal", Animation=true }
 
 KRYVEX.HalloweenSeason = {
     Month = 10,
@@ -193,7 +193,7 @@ function KRYVEX:SetTheme(mode)
     self.ThemeSettings.Theme = mode
     return self.Theme
 end
-KRYVEX:SetTheme("halloween")
+KRYVEX:SetTheme("normal")
 --=========================================================
 -- GLASS (เน€เธยเน€เธเธ—เน€เธยเน€เธยเน€เธเธเน€เธเธ…เน€เธเธ‘เน€เธยเน€เธยเน€เธยเน€เธเธเน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธเน€เธเธเน€เธยเน€เธยเน€เธยเน€เธยเน€เธเธ’)
 --=========================================================
@@ -201,13 +201,13 @@ KRYVEX:SetTheme("halloween")
 
 KRYVEX.Glass = {
 
-    Main = 0.2,
+    Main = 0.08,
 
-    Sidebar = 0.3,
+    Sidebar = 0.12,
 
-    Card = 0.4,
+    Card = 0.18,
 
-    Inner = 0.45,
+    Inner = 0.22,
 
 }
 
@@ -226,9 +226,9 @@ KRYVEX.LogoImage = "rbxassetid://72018461815575"
 
 KRYVEX.Background = {
 
-    Enabled = true,
+    Enabled = false,
 
-    Image = "rbxassetid://114611759742732",
+    Image = "",
 
     File = "Kryvex_bg.jpg",
 
@@ -3989,6 +3989,9 @@ function KRYVEX:CreateWindow(
                 BackgroundColor3 =
                     KRYVEX.Theme.Background,
 
+                BackgroundTransparency =
+                    0,
+
                 BorderSizePixel =
                     0,
 
@@ -4036,7 +4039,7 @@ function KRYVEX:CreateWindow(
         })
 
     MainSheen.Rotation =
-        35
+        28
 
     MainSheen.Parent =
         Main
@@ -4062,12 +4065,9 @@ function KRYVEX:CreateWindow(
                 BackgroundTransparency =
                     1,
 
-                Image =
-                    ResolveBackground()
-                    or "",
+                Image = "",
 
-                ImageTransparency =
-                    KRYVEX.Background.Transparency,
+                ImageTransparency = 1,
 
                 ScaleType =
                     Enum.ScaleType.Crop,
@@ -4075,8 +4075,7 @@ function KRYVEX:CreateWindow(
                 ZIndex =
                     0,
 
-                Visible =
-                    ResolveBackground() ~= nil,
+                Visible = false,
 
             }
         )
@@ -5828,19 +5827,16 @@ function KRYVEX:CreateWindow(
             0.82
 
         Main.BackgroundTransparency =
-            1
+            0
+
+        BgImage.Visible =
+            false
+
+        BgImage.Image =
+            ""
 
         BgImage.ImageTransparency =
             1
-
-        PlayTween(
-            BgImage,
-            0.4,
-            {
-                ImageTransparency =
-                    KRYVEX.Background.Transparency
-            }
-        )
 
         Main.Active =
             true
@@ -10770,19 +10766,18 @@ function KRYVEX:CreateWindow(
         0.85
 
     Main.BackgroundTransparency =
-        1
+        0
+
+    BgImage.Visible =
+        false
+
+    BgImage.Image =
+        ""
 
     BgImage.ImageTransparency =
         1
 
-    PlayTween(
-        BgImage,
-        0.6,
-        {
-            ImageTransparency =
-                KRYVEX.Background.Transparency
-        }
-    )
+    -- Background image layer intentionally disabled: solid black/charcoal UI.
 
     PlayTween(
         HideScale,
@@ -10862,46 +10857,36 @@ function KRYVEX:CreateWindow(
     return Window
 
 end
+
 --[[
 =========================================================
- KRYVEX PATCH : TWO COLUMNS + BIG HEADING
- วางทั้งไฟล์ "เหนือ" บรรทัดสุดท้าย (return KRYVEX)
- (หลัง end ของ CreateWindow, ก่อนแบนเนอร์ -- RETURN --)
- ใช้ร่วมกับแพตช์ธีม Normal ได้ ไม่ทับกัน
+ KRYVEX ALL-IN-ONE PATCH  (วางก้อนเดียวจบ)
 
- วิธีใช้:
+ วางทั้งไฟล์นี้ "เหนือ" แบนเนอร์ท้ายไลบรารี:
 
-   local Tab = Window:CreateTab("เมนูหลัก", "layout-dashboard")
+     --=====================================
+     -- RETURN
+     --=====================================
 
-   -- หัวข้อใหญ่ (เต็มความกว้าง)
-   Tab:CreateHeading({
-       Title = "ระบบเคลื่อนที่",
-       Description = "ปรับสปีด / กระโดด",   -- ไม่ใส่ก็ได้
-       Icon = "move",                        -- ไม่ใส่ก็ได้
-   })
+     return KRYVEX
 
-   -- แบ่งสองฝั่ง
-   local Cols = Tab:CreateColumns({
-       LeftTitle = "ฝั่งซ้าย",     -- ไม่ใส่ = ไม่มีหัวข้อ
-       RightTitle = "ฝั่งขวา",
-       Gap = 8,                     -- ช่องว่างระหว่างฝั่ง
-       Ratio = 0.5,                 -- สัดส่วนฝั่งซ้าย (0.5 = ครึ่งๆ)
-       Scroll = true,               -- true = แต่ละฝั่งเลื่อนลงแยกกัน (ค่าเริ่มต้น)
-                                    -- false = สองฝั่งยืดตามเนื้อหา เลื่อนไปกับหน้า
-       Height = nil,                -- กำหนดความสูงแถวเอง (ไม่ใส่ = เต็มพื้นที่ที่เหลือ)
-   })
+ (คือต่อจาก end ของ function KRYVEX:CreateWindow)
 
-   Cols.Left:CreateToggle({ Name = "ออโต้", Callback = function(v) end })
-   Cols.Right:CreateButton({ Name = "กดเลย", Callback = function() end })
-   Cols.Left:CreateHeading("หัวข้อย่อยในฝั่งซ้าย")
-   Cols.Left:CreateSlider({ Name = "สปีด", Min = 0, Max = 100 })
+ ในไฟล์นี้มี:
+   1) หัวข้อใหญ่  Tab:CreateHeading
+   2) หัวข้อเล็ก  Tab:CreateSection  (มีไอคอน + ขอบดำ)
+   3) สองฝั่ง     Tab:CreateColumns  (เลื่อนแยกกัน)
+   4) แก้บั๊กปิด UI แล้วปุ่มลอยไม่หาย + อนิเมชันตอนปิด
+   4.1) อนิเมชัน: สลับหมวด / กดปุ่ม / เปิด-ปิดสวิตช์ / สไลเดอร์มีจุดขาวใหญ่
+   5) ธีม Normal เทาดำอวกาศ + แอนิเมชัน
 
-   -- ฝั่งซ้าย/ขวาใช้คำสั่งเดิมได้ทุกอย่าง:
-   -- Button Toggle Slider Input Dropdown MultiDropdown ColorPicker
-   -- Keybind Status FeatureCard InfoCard ProfileCard CommandBox
-   -- Card Label Section Heading
+ ถ้าเคยวางแพตช์เก่าไว้ ให้ลบของเก่าออกก่อน
 =========================================================
 ]]
+
+--=========================================================
+-- PART A : LAYOUT (Heading / Section / Columns)
+--=========================================================
 
 local OriginalCreateWindow = KRYVEX.CreateWindow
 
@@ -11102,6 +11087,107 @@ function KRYVEX.AttachLayout(Tab)
     end
 
     ----------------------------------------------------
+    -- SMALL HEADING (SECTION) : icon + outlined text
+    ----------------------------------------------------
+
+    function Tab:CreateSection(config)
+
+        if type(config) ~= "table" then
+            config = { Title = config }
+        end
+
+        local Theme = KRYVEX.Theme
+
+        local TitleText = tostring(config.Title or config.Name or config.Text or "Section")
+        local IconValue = config.Icon
+        local HasIcon = IconValue ~= nil and IconValue ~= ""
+        local Height = config.Height or 30
+        local TextX = HasIcon and 30 or 4
+
+        local Frame = Create("Frame", {
+            Name = "Section",
+            Size = UDim2.new(1, 0, 0, Height),
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+        })
+        Frame.Parent = Page
+
+        if HasIcon then
+
+            local Icon, Kind = KRYVEX.CreateIcon(IconValue, {
+                Name = "SectionIcon",
+                AnchorPoint = Vector2.new(0, 0.5),
+                Position = UDim2.new(0, 4, 0.5, 0),
+                Size = UDim2.fromOffset(20, 20),
+                Color = config.IconColor or config.Color or Theme.Primary,
+                TextSize = 17,
+                ZIndex = 2,
+            })
+
+            if Icon then
+
+                Icon.Parent = Frame
+
+                -- ไอคอนแบบสัญลักษณ์ใส่ขอบดำได้ / ไอคอนรูปภาพใส่เงาดำรองหลัง
+                if Kind == "glyph" then
+
+                    local IconStroke = Instance.new("UIStroke")
+                    IconStroke.Color = config.StrokeColor or Color3.new(0, 0, 0)
+                    IconStroke.Thickness = config.StrokeThickness or 2
+                    IconStroke.Parent = Icon
+
+                else
+
+                    local Shadow = KRYVEX.CreateIcon(IconValue, {
+                        Name = "SectionIconShadow",
+                        AnchorPoint = Vector2.new(0, 0.5),
+                        Position = UDim2.new(0, 5, 0.5, 1),
+                        Size = UDim2.fromOffset(20, 20),
+                        Color = config.StrokeColor or Color3.new(0, 0, 0),
+                        Transparency = 0.25,
+                        ZIndex = 1,
+                    })
+
+                    if Shadow then
+                        Shadow.Parent = Frame
+                    end
+
+                end
+
+            end
+
+        end
+
+        local TitleLabel = Create("TextLabel", {
+            Name = "SectionTitle",
+            Position = UDim2.new(0, TextX, 0, 0),
+            Size = UDim2.new(1, -TextX, 1, 0),
+            BackgroundTransparency = 1,
+            Text = TitleText,
+            TextColor3 = config.Color or Theme.Primary,
+            TextSize = config.TextSize or 15,
+            Font = Enum.Font.GothamBlack,
+            TextXAlignment = Enum.TextXAlignment.Left,
+            TextYAlignment = Enum.TextYAlignment.Center,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            ZIndex = 2,
+        })
+        TitleLabel.Parent = Frame
+
+        -- ขอบตัวอักษรสีดำ ให้เห็นชัดบนทุกพื้น
+        local TitleStroke = Instance.new("UIStroke")
+        TitleStroke.Color = config.StrokeColor or Color3.new(0, 0, 0)
+        TitleStroke.Thickness = config.StrokeThickness or 2
+        TitleStroke.Transparency = 0
+        TitleStroke.LineJoinMode = Enum.LineJoinMode.Round
+        TitleStroke.Parent = TitleLabel
+
+        -- คืนเป็น TextLabel เหมือนเดิม: S.Text = "ชื่อใหม่" ใช้ได้
+        return TitleLabel
+
+    end
+
+    ----------------------------------------------------
     -- TWO COLUMNS
     ----------------------------------------------------
 
@@ -11277,6 +11363,342 @@ function KRYVEX.AttachLayout(Tab)
     Tab.CreateTwoColumns = Tab.CreateColumns
 
     ----------------------------------------------------
+    -- ANIMATIONS + SLIDER KNOB
+    -- (ต้องอยู่ก่อนส่วนเก็บ Originals เพื่อให้ฝั่งซ้าย/ขวาได้ของใหม่ด้วย)
+    ----------------------------------------------------
+
+    -- ห่อฟังก์ชันสร้างของ: หลังสร้างเสร็จ ส่ง Frame ที่เพิ่งเกิด + ค่าที่คืนมา ให้ Callback ตกแต่งต่อ
+    local function Decorate(Name, Callback)
+
+        local Base = Tab[Name]
+
+        if type(Base) ~= "function" then
+            return
+        end
+
+        Tab[Name] = function(self, ...)
+
+            local Before = Snapshot()
+            local Result = table.pack(Base(self, ...))
+
+            for _, Child in ipairs(NewChildren(Before)) do
+                pcall(Callback, Child, Result[1])
+            end
+
+            return table.unpack(Result, 1, Result.n)
+
+        end
+
+    end
+
+    -- ตำแหน่งคลิกเทียบกับ Frame (ไม่ได้ = กลาง Frame)
+    local function LocalClick(Frame)
+
+        local Ok, Pos = pcall(function()
+            return UserInputService:GetMouseLocation()
+        end)
+
+        if Ok and Pos then
+
+            local X = Pos.X - Frame.AbsolutePosition.X
+            local Y = Pos.Y - Frame.AbsolutePosition.Y
+
+            if X >= 0 and Y >= 0
+                and X <= Frame.AbsoluteSize.X
+                and Y <= Frame.AbsoluteSize.Y
+            then
+                return X, Y
+            end
+
+        end
+
+        return Frame.AbsoluteSize.X / 2, Frame.AbsoluteSize.Y / 2
+
+    end
+
+    -- วงน้ำกระเพื่อมตอนกด
+    local function Ripple(Frame)
+
+        local X, Y = LocalClick(Frame)
+
+        local Size = math.max(Frame.AbsoluteSize.X, 80) * 1.4
+
+        local Dot = Create("Frame", {
+            Name = "Ripple",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Position = UDim2.fromOffset(X, Y),
+            Size = UDim2.fromOffset(0, 0),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BackgroundTransparency = 0.72,
+            BorderSizePixel = 0,
+            ZIndex = 1,
+        })
+        Dot.Parent = Frame
+        AddCorner(Dot, 500)
+
+        PlayTween(Dot, 0.5, {
+            Size = UDim2.fromOffset(Size, Size),
+            BackgroundTransparency = 1,
+        }, Enum.EasingStyle.Quad)
+
+        task.delay(0.55, function()
+            if Dot.Parent then
+                Dot:Destroy()
+            end
+        end)
+
+    end
+
+    -- ปุ่ม: กระเพื่อม + ขอบวาบ + ลูกศรกระดก
+    Decorate("CreateButton", function(Frame)
+
+        local Action = Frame:FindFirstChild("ActionButton")
+
+        if not Action then
+            return
+        end
+
+        local Stroke = Frame:FindFirstChildOfClass("UIStroke")
+        local Badge = Action:FindFirstChild("ClickIndicator")
+
+        Action.Activated:Connect(function()
+
+            Ripple(Frame)
+
+            if Stroke then
+                Stroke.Transparency = 0.15
+                PlayTween(Stroke, 0.4, { Transparency = 0.88 })
+            end
+
+            if Badge then
+                Badge.Position = UDim2.new(1, -5, 0.5, 0)
+                PlayTween(Badge, 0.35, {
+                    Position = UDim2.new(1, -12, 0.5, 0),
+                }, Enum.EasingStyle.Back)
+            end
+
+        end)
+
+    end)
+
+    -- สวิตช์: เด้งขยาย + เรืองแสงตอนเปิด + กระเพื่อม
+    Decorate("CreateToggle", function(Frame, Handle)
+
+        local Switch = Frame:FindFirstChild("Switch")
+
+        if not Switch then
+            return
+        end
+
+        local Glow = Instance.new("UIStroke")
+        Glow.Color = KRYVEX.Theme.Primary
+        Glow.Thickness = 3
+        Glow.Transparency = 1
+        Glow.Parent = Switch
+
+        Switch.Activated:Connect(function()
+
+            Ripple(Frame)
+
+            PlayTween(Switch, 0.08, {
+                Size = UDim2.fromOffset(52, 28),
+            })
+
+            task.delay(0.08, function()
+                if Switch.Parent then
+                    PlayTween(Switch, 0.25, {
+                        Size = UDim2.fromOffset(44, 24),
+                    }, Enum.EasingStyle.Back)
+                end
+            end)
+
+            local On = false
+
+            if type(Handle) == "table" and Handle.Get then
+                On = Handle.Get()
+            end
+
+            if On then
+                Glow.Transparency = 0.2
+                PlayTween(Glow, 0.6, { Transparency = 1 })
+            end
+
+        end)
+
+    end)
+
+    -- สไลเดอร์: จุดขาวใหญ่ให้เห็นว่าลากได้
+    Decorate("CreateSlider", function(Frame)
+
+        local Bar
+
+        for _, Child in ipairs(Frame:GetChildren()) do
+            if Child:IsA("Frame") and Child:FindFirstChildOfClass("TextButton") then
+                Bar = Child
+                break
+            end
+        end
+
+        if not Bar then
+            return
+        end
+
+        local Fill = Bar:FindFirstChildOfClass("Frame")
+        local Hitbox = Bar:FindFirstChildOfClass("TextButton")
+
+        if not Fill or not Hitbox then
+            return
+        end
+
+        -- แสงเรืองรอบจุด
+        local Halo = Create("Frame", {
+            Name = "KnobHalo",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Size = UDim2.fromOffset(28, 28),
+            BackgroundColor3 = KRYVEX.Theme.Primary,
+            BackgroundTransparency = 0.82,
+            BorderSizePixel = 0,
+            ZIndex = 3,
+        })
+        Halo.Parent = Bar
+        AddCorner(Halo, 20)
+
+        -- จุดขาว
+        local Knob = Create("Frame", {
+            Name = "Knob",
+            AnchorPoint = Vector2.new(0.5, 0.5),
+            Size = UDim2.fromOffset(18, 18),
+            BackgroundColor3 = Color3.new(1, 1, 1),
+            BackgroundTransparency = 0,
+            BorderSizePixel = 0,
+            ZIndex = 4,
+        })
+        Knob.Parent = Bar
+        AddCorner(Knob, 20)
+        AddStroke(Knob, Color3.new(0, 0, 0), 0.55, 2)
+
+        local function Sync()
+
+            local Position = UDim2.new(Fill.Size.X.Scale, 0, 0.5, 0)
+
+            Knob.Position = Position
+            Halo.Position = Position
+
+        end
+
+        Fill:GetPropertyChangedSignal("Size"):Connect(Sync)
+        Sync()
+
+        -- ขยายพื้นที่จับให้ครอบจุดด้วย และอยู่เหนือจุดเพื่อรับการลาก
+        Hitbox.ZIndex = 8
+        Hitbox.Size = UDim2.new(1, 24, 0, 34)
+        Hitbox.Position = UDim2.new(0, -12, 0.5, -17)
+
+        local Grabbed = false
+
+        local function Grow(Big)
+
+            PlayTween(Knob, 0.15, {
+                Size = Big and UDim2.fromOffset(24, 24) or UDim2.fromOffset(18, 18),
+            }, Enum.EasingStyle.Back)
+
+            PlayTween(Halo, 0.15, {
+                Size = Big and UDim2.fromOffset(40, 40) or UDim2.fromOffset(28, 28),
+                BackgroundTransparency = Big and 0.65 or 0.82,
+            })
+
+        end
+
+        Hitbox.MouseEnter:Connect(function()
+            if not Grabbed then
+                PlayTween(Knob, 0.12, { Size = UDim2.fromOffset(21, 21) })
+            end
+        end)
+
+        Hitbox.MouseLeave:Connect(function()
+            if not Grabbed then
+                Grow(false)
+            end
+        end)
+
+        Hitbox.InputBegan:Connect(function(Input)
+
+            if Input.UserInputType == Enum.UserInputType.MouseButton1
+                or Input.UserInputType == Enum.UserInputType.Touch
+            then
+                Grabbed = true
+                Grow(true)
+            end
+
+        end)
+
+        UserInputService.InputEnded:Connect(function(Input)
+
+            if Grabbed
+                and (
+                    Input.UserInputType == Enum.UserInputType.MouseButton1
+                    or Input.UserInputType == Enum.UserInputType.Touch
+                )
+            then
+                Grabbed = false
+                Grow(false)
+            end
+
+        end)
+
+    end)
+
+    -- สลับหมวด: หน้าเลื่อนขึ้นนุ่มๆ + ม่านจางเข้า
+    local BaseSelect = Tab.Select
+
+    if type(BaseSelect) == "function" then
+
+        Tab.Select = function(self, ...)
+
+            local Already = Page.Visible
+
+            BaseSelect(self, ...)
+
+            if Already then
+                return
+            end
+
+            Page.Position = UDim2.new(0, 0, 0, 18)
+
+            PlayTween(Page, 0.35, {
+                Position = UDim2.new(0, 0, 0, 0),
+            }, Enum.EasingStyle.Quint)
+
+            local Content = Page.Parent
+
+            if Content then
+
+                local Veil = Content:FindFirstChild("TabVeil")
+
+                if not Veil then
+
+                    Veil = Create("Frame", {
+                        Name = "TabVeil",
+                        Size = UDim2.fromScale(1, 1),
+                        BackgroundColor3 = KRYVEX.Theme.Background,
+                        BackgroundTransparency = 1,
+                        BorderSizePixel = 0,
+                        ZIndex = 50,
+                    })
+                    Veil.Parent = Content
+
+                end
+
+                Veil.BackgroundTransparency = 0.45
+                PlayTween(Veil, 0.32, { BackgroundTransparency = 1 })
+
+            end
+
+        end
+
+    end
+
+    ----------------------------------------------------
     -- เก็บของเดิม แล้วห่อให้ทุกอย่างมี LayoutOrder ตามลำดับ
     ----------------------------------------------------
 
@@ -11323,6 +11745,55 @@ function KRYVEX:CreateWindow(config)
 
     local Window = OriginalCreateWindow(self, config)
 
+    -- ปิด UI: เด้งขยายนิดนึงแล้วย่อหายไป + ปุ่มลอยหดหายตาม (และแก้บั๊กปุ่มลอยไม่หาย)
+    local OriginalDestroy = Window.Destroy
+    local Closing = false
+
+    function Window:Destroy()
+
+        if Closing or Window.Destroyed then
+            return
+        end
+
+        Closing = true
+
+        local HideScale = Window.HideScale
+        local FloatButton = Window.FloatButton
+
+        if HideScale then
+            PlayTween(HideScale, 0.09, { Scale = 1.04 })
+        end
+
+        task.delay(0.09, function()
+
+            if HideScale then
+                PlayTween(HideScale, 0.3, { Scale = 0.75 },
+                    Enum.EasingStyle.Back, Enum.EasingDirection.In)
+            end
+
+            if FloatButton then
+
+                local FloatScale = FloatButton:FindFirstChildOfClass("UIScale")
+
+                if FloatScale then
+                    PlayTween(FloatScale, 0.25, { Scale = 0 },
+                        Enum.EasingStyle.Back, Enum.EasingDirection.In)
+                end
+
+            end
+
+            OriginalDestroy(Window)
+
+            task.delay(0.4, function()
+                if Window.FloatGui then
+                    Window.FloatGui:Destroy()
+                end
+            end)
+
+        end)
+
+    end
+
     local OriginalCreateTab = Window.CreateTab
 
     function Window:CreateTab(name, icon)
@@ -11337,17 +11808,9 @@ function KRYVEX:CreateWindow(config)
 
 end
 
---[[
-=========================================================
- KRYVEX NORMAL THEME : GRAY-BLACK SPACE EDITION
- วางทั้งไฟล์ "เหนือ" บรรทัด:  --- RETURN ---  / return KRYVEX
- (หลัง end ของ CreateWindow) แล้ว CreateWindow({ Theme = "normal" })
-
- ถ้าวางแพตช์ Combined เก่าไว้แล้ว ให้ลบอันเก่าทิ้งก่อน!
-
- สวิตช์: KRYVEX.NormalFX.Intro = false  (ปิดฉากเปิด)
-=========================================================
-]]
+--=========================================================
+-- PART B : NORMAL THEME (SPACE)
+--=========================================================
 
 --=========================================================
 -- PALETTE : เทา-ดำ อวกาศ
@@ -12050,6 +12513,516 @@ function KRYVEX.BuildSeasonFX(Window, Main, Header, Title)
 
 end
 
+--=========================================================
+-- PART C : SLIDER (พิมพ์เลขได้) + DROPDOWN / MULTI (ลิสต์สด, โหมดผู้เล่น)
+-- วางเหนือ: return KRYVEX
+--=========================================================
+
+local function BuildSlider(Page, config)
+    config = config or {}
+
+    local min = config.Min or 0
+    local max = config.Max or 100
+    local step = config.Increment or 1 -- ทศนิยมใส่ 0.1 / 0.01
+
+    local decimals = 0
+    do
+        local frac = tostring(step):match("%.(%d+)")
+        decimals = frac and #frac or 0
+    end
+
+    local conns = {}
+
+    local function Snap(v)
+        v = math.clamp(v, min, max)
+        if step > 0 then
+            v = math.floor((v - min) / step + 0.5) * step + min
+        end
+        v = tonumber(string.format("%." .. decimals .. "f", v)) or v
+        return math.clamp(v, min, max)
+    end
+
+    local function Fmt(v)
+        return string.format("%." .. decimals .. "f", v)
+    end
+
+    local value = Snap(config.Default or min)
+
+    local Frame = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 65),
+        BackgroundColor3 = KRYVEX.Theme.Card,
+    })
+    Frame.Parent = Page
+    AddCorner(Frame, KRYVEX.Corners.Element)
+
+    local Label = Create("TextLabel", {
+        Size = UDim2.new(1, -100, 0, 24),
+        Position = UDim2.fromOffset(14, 5),
+        BackgroundTransparency = 1,
+        Text = config.Name or "Slider",
+        TextColor3 = KRYVEX.Theme.Text,
+        TextSize = 12,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+    })
+    Label.Parent = Frame
+
+    local ValueBox = Create("TextBox", {
+        Name = "ValueBox",
+        AnchorPoint = Vector2.new(1, 0),
+        Size = UDim2.fromOffset(64, 22),
+        Position = UDim2.new(1, -12, 0, 6),
+        BackgroundColor3 = KRYVEX.Theme.Background,
+        Text = Fmt(value),
+        PlaceholderText = "...",
+        PlaceholderColor3 = KRYVEX.Theme.SubText,
+        TextColor3 = KRYVEX.Theme.Primary,
+        TextSize = 12,
+        Font = Enum.Font.GothamBold,
+        TextXAlignment = Enum.TextXAlignment.Center,
+        ClearTextOnFocus = false,
+    })
+    ValueBox.Parent = Frame
+    AddCorner(ValueBox, KRYVEX.Corners.Inner)
+
+    local BoxStroke = AddStroke(ValueBox, KRYVEX.Theme.Primary, 0.8, 1)
+
+    local Bar = Create("Frame", {
+        Size = UDim2.new(1, -28, 0, 6),
+        Position = UDim2.fromOffset(14, 43),
+        BackgroundColor3 = KRYVEX.Theme.ToggleOff,
+    })
+    Bar.Parent = Frame
+    AddCorner(Bar, 6)
+
+    local Fill = Create("Frame", {
+        Size = UDim2.new((value - min) / (max - min), 0, 1, 0),
+        BackgroundColor3 = KRYVEX.Theme.Primary,
+    })
+    Fill.Parent = Bar
+    AddCorner(Fill, 6)
+
+    local Hitbox = Create("TextButton", {
+        Size = UDim2.new(1, 0, 0, 24),
+        Position = UDim2.new(0, 0, 0.5, -12),
+        BackgroundTransparency = 1,
+        Text = "",
+        AutoButtonColor = false,
+    })
+    Hitbox.Parent = Bar
+
+    local sliding = false
+
+    local function SetValue(newValue, silent)
+        value = Snap(newValue)
+        Fill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+
+        if not ValueBox:IsFocused() then
+            ValueBox.Text = Fmt(value)
+        end
+
+        if config.Callback and not silent then
+            task.spawn(config.Callback, value)
+        end
+    end
+
+    ValueBox.Focused:Connect(function()
+        PlayTween(BoxStroke, 0.15, { Transparency = 0.1, Thickness = 1.6 })
+    end)
+
+    ValueBox.FocusLost:Connect(function()
+        PlayTween(BoxStroke, 0.15, { Transparency = 0.8, Thickness = 1 })
+
+        local typed = tonumber((ValueBox.Text:gsub("[%s,]", "")))
+
+        if typed then
+            SetValue(typed) -- เกิน min/max โดน clamp ให้
+        end
+
+        ValueBox.Text = Fmt(value) -- พิมพ์มั่ว = คืนค่าเดิม
+    end)
+
+    Hitbox.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch
+        then
+            sliding = true
+            if ValueBox:IsFocused() then
+                ValueBox:ReleaseFocus()
+            end
+        end
+    end)
+
+    table.insert(conns, UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1
+            or input.UserInputType == Enum.UserInputType.Touch
+        then
+            sliding = false
+        end
+    end))
+
+    table.insert(conns, UserInputService.InputChanged:Connect(function(input)
+        if not sliding then
+            return
+        end
+
+        if input.UserInputType == Enum.UserInputType.MouseMovement
+            or input.UserInputType == Enum.UserInputType.Touch
+        then
+            local percent = math.clamp(
+                (input.Position.X - Bar.AbsolutePosition.X) / Bar.AbsoluteSize.X,
+                0, 1
+            )
+            SetValue(min + (max - min) * percent)
+        end
+    end))
+
+    Frame.AncestryChanged:Connect(function()
+        if not Frame:IsDescendantOf(game) then
+            for _, c in ipairs(conns) do c:Disconnect() end
+        end
+    end)
+
+    return {
+        Set = function(_, v) SetValue(v) end,
+        Get = function() return value end,
+    }
+end
+
+-- ตัวสร้างร่วม: multi=false -> Dropdown, multi=true -> MultiDropdown
+local function BuildDropdown(Page, config, multi)
+    config = config or {}
+
+    local ITEM_H, ITEM_GAP = 30, 4
+    local MAX_VISIBLE = config.MaxVisible or 5
+    local isPlayers = config.Players == true
+    local includeSelf = config.IncludeSelf == true
+    local placeholder = config.Placeholder or "Select"
+
+    local options, labels, buttons, conns = {}, {}, {}, {}
+    local open = false
+
+    local selected          -- single
+    local sel = {}          -- multi (set)
+
+    if multi then
+        for _, v in ipairs(config.Default or {}) do sel[v] = true end
+    else
+        selected = config.Default
+    end
+
+    local Frame = Create("Frame", {
+        Size = UDim2.new(1, 0, 0, 48),
+        BackgroundColor3 = KRYVEX.Theme.Card,
+        ClipsDescendants = true,
+    })
+    Frame.Parent = Page
+    AddCorner(Frame, KRYVEX.Corners.Element)
+
+    local Button = Create("TextButton", {
+        Size = UDim2.new(1, -20, 0, 48),
+        Position = UDim2.fromOffset(10, 0),
+        BackgroundTransparency = 1,
+        Text = "",
+        TextColor3 = KRYVEX.Theme.Text,
+        TextSize = 12,
+        Font = Enum.Font.GothamMedium,
+        TextXAlignment = Enum.TextXAlignment.Left,
+        TextTruncate = Enum.TextTruncate.AtEnd,
+        AutoButtonColor = false,
+    })
+    Button.Parent = Frame
+
+    local List = Create("ScrollingFrame", {
+        Name = "OptionList",
+        Position = UDim2.fromOffset(10, 52),
+        Size = UDim2.new(1, -20, 0, 0),
+        BackgroundTransparency = 1,
+        BorderSizePixel = 0,
+        ScrollBarThickness = 2,
+        ScrollBarImageColor3 = KRYVEX.Theme.Primary,
+        CanvasSize = UDim2.new(),
+        AutomaticCanvasSize = Enum.AutomaticSize.Y,
+        Visible = false,
+    })
+    List.Parent = Frame
+
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, ITEM_GAP)
+    ListLayout.Parent = List
+
+    local Empty = Create("TextLabel", {
+        Size = UDim2.new(1, -20, 0, ITEM_H),
+        Position = UDim2.fromOffset(10, 52),
+        BackgroundTransparency = 1,
+        Text = "- ไม่มีรายการ -",
+        TextColor3 = KRYVEX.Theme.SubText,
+        TextSize = 11,
+        Font = Enum.Font.Gotham,
+        Visible = false,
+    })
+    Empty.Parent = Frame
+
+    local function TextOf(value)
+        if value == nil then return placeholder end
+        return labels[value] or tostring(value)
+    end
+
+    local function SelectedList()
+        local out = {}
+        for _, v in ipairs(options) do
+            if sel[v] then table.insert(out, v) end
+        end
+        return out
+    end
+
+    local function RefreshHeader()
+        local arrow = open and "\u{25B2}" or "\u{25BC}"
+        if multi then
+            Button.Text = "Selected: " .. #SelectedList() .. "  " .. arrow
+        else
+            Button.Text = TextOf(selected) .. "  " .. arrow
+        end
+    end
+
+    local function ListHeight()
+        local n = math.min(#options, MAX_VISIBLE)
+        if n == 0 then return ITEM_H end
+        return n * ITEM_H + (n - 1) * ITEM_GAP
+    end
+
+    local function Resize()
+        local h = ListHeight()
+        List.Size = UDim2.new(1, -20, 0, #options == 0 and 0 or h)
+        List.Visible = open and #options > 0
+        Empty.Visible = open and #options == 0
+
+        PlayTween(Frame, 0.2, {
+            Size = UDim2.new(1, 0, 0, open and (48 + 4 + h + 8) or 48),
+        })
+    end
+
+    local function Highlight()
+        for value, btn in pairs(buttons) do
+            local on
+            if multi then on = sel[value] == true else on = (value == selected) end
+            btn.BackgroundColor3 = on and KRYVEX.Theme.PrimaryDark or KRYVEX.Theme.Background
+            btn.TextColor3 = on and KRYVEX.Theme.Text or KRYVEX.Theme.SubText
+            btn.Text = (multi and on and "\u{2713} " or "") .. TextOf(value)
+        end
+    end
+
+    local function Fire()
+        if not config.Callback then return end
+        if multi then
+            task.spawn(config.Callback, SelectedList())
+        else
+            task.spawn(config.Callback, selected)
+        end
+    end
+
+    local function Pick(value)
+        if multi then
+            sel[value] = not sel[value] or nil
+            Highlight()
+            RefreshHeader()
+            Fire()
+        else
+            selected = value
+            open = false
+            Highlight()
+            RefreshHeader()
+            Resize()
+            Fire()
+        end
+    end
+
+    local function MakeOption(value)
+        local Option = Create("TextButton", {
+            Name = "Option",
+            Size = UDim2.new(1, -4, 0, ITEM_H),
+            BackgroundColor3 = KRYVEX.Theme.Background,
+            Text = TextOf(value),
+            TextColor3 = KRYVEX.Theme.SubText,
+            TextSize = 11,
+            Font = Enum.Font.Gotham,
+            TextTruncate = Enum.TextTruncate.AtEnd,
+            AutoButtonColor = false,
+        })
+        Option.Parent = List
+        AddCorner(Option, KRYVEX.Corners.Inner)
+        Option.Activated:Connect(function() Pick(value) end)
+        return Option
+    end
+
+    -- diff เฉพาะที่เปลี่ยน ไม่ล้างสร้างใหม่ทั้งลิสต์ = ไม่แลค
+    local function SetOptions(newList)
+        newList = newList or {}
+
+        local keep = {}
+        for _, v in ipairs(newList) do keep[v] = true end
+
+        local gone = {}
+
+        for value, btn in pairs(buttons) do
+            if not keep[value] then
+                btn:Destroy()
+                buttons[value] = nil
+                table.insert(gone, value)
+            end
+        end
+
+        for index, v in ipairs(newList) do
+            local btn = buttons[v]
+            if not btn then
+                btn = MakeOption(v)
+                buttons[v] = btn
+            end
+            btn.LayoutOrder = index
+        end
+
+        options = newList
+
+        local changed = false
+
+        for _, value in ipairs(gone) do
+            if multi then
+                if sel[value] then
+                    sel[value] = nil
+                    changed = true
+                    if config.OnSelectedLeft then task.spawn(config.OnSelectedLeft, value) end
+                end
+            elseif value == selected then
+                selected = nil
+                if config.OnSelectedLeft then task.spawn(config.OnSelectedLeft, value) end
+            end
+        end
+
+        Highlight()
+        RefreshHeader()
+        Resize()
+
+        if multi and changed then Fire() end
+    end
+
+    local function CollectPlayers()
+        local list = {}
+
+        for _, p in ipairs(Players:GetPlayers()) do
+            if includeSelf or p ~= LocalPlayer then
+                table.insert(list, p.Name)
+
+                if config.ShowDisplayName and p.DisplayName ~= p.Name then
+                    labels[p.Name] = p.DisplayName .. " (@" .. p.Name .. ")"
+                else
+                    labels[p.Name] = p.Name
+                end
+            end
+        end
+
+        table.sort(list, function(a, b) return a:lower() < b:lower() end)
+
+        return list
+    end
+
+    if isPlayers then
+        local pending = false
+
+        -- debounce: คนเข้า/ออกรัวๆ ก็คำนวณรอบเดียว
+        local function Queue()
+            if pending then return end
+            pending = true
+
+            task.delay(0.15, function()
+                pending = false
+                if Frame.Parent then SetOptions(CollectPlayers()) end
+            end)
+        end
+
+        table.insert(conns, Players.PlayerAdded:Connect(Queue))
+        table.insert(conns, Players.PlayerRemoving:Connect(Queue))
+
+        SetOptions(CollectPlayers())
+    else
+        SetOptions(config.Options or {})
+
+        if not multi and selected == nil and config.Default == nil and config.AutoSelectFirst ~= false then
+            selected = options[1]
+            Highlight()
+        end
+    end
+
+    RefreshHeader()
+
+    Button.Activated:Connect(function()
+        open = not open
+        RefreshHeader()
+        Resize()
+    end)
+
+    Frame.AncestryChanged:Connect(function()
+        if not Frame:IsDescendantOf(game) then
+            for _, c in ipairs(conns) do c:Disconnect() end
+        end
+    end)
+
+    return {
+        Frame = Frame,
+
+        Set = function(_, v)
+            if multi then
+                sel = {}
+                for _, x in ipairs(v or {}) do sel[x] = true end
+                Highlight(); RefreshHeader(); Fire()
+            else
+                selected = v
+                Highlight(); RefreshHeader(); Fire()
+            end
+        end,
+
+        Get = function()
+            if multi then return SelectedList() end
+            return selected
+        end,
+
+        Refresh = function(_, newList)
+            if isPlayers then
+                SetOptions(CollectPlayers())
+            else
+                SetOptions(newList or options)
+            end
+        end,
+
+        SetOptions = function(_, newList) SetOptions(newList) end,
+        GetOptions = function() return options end,
+    }
+end
+
+-- ดัก AttachLayout: ใส่ของใหม่ "ก่อน" ที่แพตช์เลเยอร์จะห่อ (ฝั่งซ้าย/ขวาเลยได้ด้วย)
+local BaseAttachLayout = KRYVEX.AttachLayout
+
+function KRYVEX.AttachLayout(Tab)
+
+    if Tab and Tab.Page then
+
+        function Tab:CreateSlider(config)
+            return BuildSlider(Tab.Page, config)
+        end
+
+        function Tab:CreateDropdown(config)
+            return BuildDropdown(Tab.Page, config, false)
+        end
+
+        function Tab:CreateMultiDropdown(config)
+            return BuildDropdown(Tab.Page, config, true)
+        end
+
+    end
+
+    return BaseAttachLayout(Tab)
+
+end
 
 --=========================================================
 -- RETURN
