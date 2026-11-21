@@ -201,13 +201,13 @@ KRYVEX:SetTheme("normal")
 
 KRYVEX.Glass = {
 
-    Main = 0.025,
+    Main = 0.60,
 
-    Sidebar = 0.07,
+    Sidebar = 0.60,
 
-    Card = 0.12,
+    Card = 0.60,
 
-    Inner = 0.16,
+    Inner = 0.60,
 
 }
 
@@ -3990,7 +3990,7 @@ function KRYVEX:CreateWindow(
                     KRYVEX.Theme.Background,
 
                 BackgroundTransparency =
-                    0,
+                    KRYVEX.Glass.Main,
 
                 BorderSizePixel =
                     0,
@@ -10957,7 +10957,7 @@ function KRYVEX:CreateWindow(
         0.85
 
     Main.BackgroundTransparency =
-        0
+        KRYVEX.Glass.Main
 
     BgImage.Visible =
         false
