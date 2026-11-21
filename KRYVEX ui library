@@ -226,15 +226,16 @@ KRYVEX.LogoImage = "rbxassetid://72018461815575"
 
 KRYVEX.Background = {
 
-    Enabled = true,
+    -- Background image disabled: use the Library's native black/silver UI styling.
+    Enabled = false,
 
-    Image = "rbxassetid://114611759742732",
+    Image = "",
 
-    File = "Kryvex_bg.jpg",
+    File = "",
 
     Url = "",
 
-    Transparency = 0.5,
+    Transparency = 1,
 
 }
 
