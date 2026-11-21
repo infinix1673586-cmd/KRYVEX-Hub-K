@@ -201,13 +201,14 @@ KRYVEX:SetTheme("normal")
 
 KRYVEX.Glass = {
 
-    Main = 0.60,
+    -- Opaque enough to keep gameplay from showing through the panel.
+    Main = 0.08,
 
-    Sidebar = 0.60,
+    Sidebar = 0.06,
 
-    Card = 0.60,
+    Card = 0.24,
 
-    Inner = 0.60,
+    Inner = 0.18,
 
 }
 
@@ -4020,9 +4021,10 @@ function KRYVEX:CreateWindow(
 
     MainSheen.Color =
         ColorSequence.new({
-            ColorSequenceKeypoint.new(0, Color3.fromRGB(3, 4, 6)),
-            ColorSequenceKeypoint.new(0.48, Color3.fromRGB(12, 13, 16)),
-            ColorSequenceKeypoint.new(1, Color3.fromRGB(190, 193, 201)),
+            ColorSequenceKeypoint.new(0, Color3.fromRGB(3, 3, 4)),
+            ColorSequenceKeypoint.new(0.46, Color3.fromRGB(12, 13, 16)),
+            ColorSequenceKeypoint.new(0.78, Color3.fromRGB(48, 50, 57)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(112, 116, 126)),
         })
 
     MainSheen.Rotation =
@@ -4056,7 +4058,7 @@ function KRYVEX:CreateWindow(
                     "",
 
                 ImageTransparency =
-                    KRYVEX.Background.Transparency,
+                    1,
 
                 ScaleType =
                     Enum.ScaleType.Crop,
@@ -4092,8 +4094,8 @@ function KRYVEX:CreateWindow(
         AnchorPoint = Vector2.new(1, 0),
         Position = UDim2.new(1, 0, 0, 58),
         Size = UDim2.new(0.58, 0, 1, -58),
-        BackgroundColor3 = Color3.fromRGB(235, 238, 245),
-        BackgroundTransparency = 0.72,
+        BackgroundColor3 = Color3.fromRGB(225, 229, 238),
+        BackgroundTransparency = 0.32,
         BorderSizePixel = 0,
         ZIndex = 0,
     })
@@ -4103,9 +4105,9 @@ function KRYVEX:CreateWindow(
     HazeGradient.Rotation = 0
     HazeGradient.Transparency = NumberSequence.new({
         NumberSequenceKeypoint.new(0, 1),
-        NumberSequenceKeypoint.new(0.28, 0.94),
-        NumberSequenceKeypoint.new(0.72, 0.68),
-        NumberSequenceKeypoint.new(1, 0.52),
+        NumberSequenceKeypoint.new(0.22, 0.96),
+        NumberSequenceKeypoint.new(0.58, 0.70),
+        NumberSequenceKeypoint.new(1, 0.34),
     })
     HazeGradient.Parent = SilverHaze
 
